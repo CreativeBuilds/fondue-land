@@ -14,18 +14,116 @@ const sleep = (ms) =>
 
 module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
   const { deploy } = deployments;
-  const { deployer } = await getNamedAccounts();
+  const { deployer, alice, bob } = await getNamedAccounts();
   const chainId = await getChainId();
 
-  await deploy("YourContract", {
-    // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
+  // get signers
+  const [d, a, b] = await ethers.getSigners();
+
+  console.log(deployer, alice, bob);
+
+  const { address } = await deploy("FonduePot", {
     from: deployer,
-    // args: [ "Hello", ethers.utils.parseEther("1.5") ],
     log: true,
   });
 
-  // Getting a previously deployed contract
-  const YourContract = await ethers.getContract("YourContract", deployer);
+  console.log(`Deployed contract @ ${address}`);
+  const fondue = await ethers.getContractAt("FonduePot", address);
+
+  // load cheez contract using IERC20 interface
+  const cheezAddress = await fondue.CHEEZ();
+  const cheez = await ethers.getContractAt("IERC20", cheezAddress);
+
+  // Get cheez balance for alice and bob
+  const aliceCheezBalance = await cheez.balanceOf(alice);
+  const bobCheezBalance = await cheez.balanceOf(bob);
+  console.log(`Alice has ${aliceCheezBalance} cheez`);
+  console.log(`Bob has ${bobCheezBalance} cheez`);
+
+  const canDeposit = await fondue.canDeposit();
+
+  // if cant deposit initPot
+  if (!canDeposit) {
+    await fondue.connect(d).initPot();
+  }
+
+  // if canDeposit, have account alice deposit 0.01 CHEEZ
+  await cheez.connect(a).approve(address, aliceCheezBalance);
+  // deposit 0.01 CHEEZ
+  await fondue.connect(a).deposit(Math.floor(0.01 * 10 ** 9), {
+    gasLimit: 1000000,
+  });
+
+  // wait for deposit to be processed
+  await sleep(5000);
+
+  let currentRound = await fondue.roundId();
+  console.log(`Current round id: ${currentRound}`);
+
+  // get amount of entries
+  const amountOfEntries = await fondue.getEntries();
+  console.log(`Amount of entries: ${amountOfEntries}`);
+
+  // get first entry
+  const firstEntry = await fondue.entries(0);
+  console.log(`First entry: ${firstEntry}`);
+
+  // Get alice win chance
+  const aliceWinChance = await fondue.getWinChance(0).catch((err) => {
+    console.log(err);
+    return -1;
+  });
+  console.log(`Alice win chance: ${aliceWinChance} / 10000`);
+
+  // have bob deposit 0.01 cheez
+  await cheez.connect(b).approve(address, bobCheezBalance);
+  // use increased gas limit
+  await fondue.connect(b).deposit(Math.floor(0.01 * 10 ** 9), {
+    gasLimit: 1000000,
+  });
+  console.time("time till close");
+
+  // get bobs entry
+  const bobEntry = await fondue.entries(1);
+  console.log(`Bob entry: ${bobEntry}`);
+
+  // get bobs win chance
+  const bobWinChance = await fondue.getWinChance(1);
+  console.log(`Bob win chance: ${bobWinChance} / 10000`);
+
+  // get alices new win chance
+  const aliceNewWinChance = await fondue.getWinChance(0);
+  console.log(`Alice new win chance: ${aliceNewWinChance} / 10000`);
+
+  // function that loops until blocksTillClose is 0
+  const loop = async () => {
+    // eslint-disable-next-line no-underscore-dangle
+    const _blocksTillClose = await fondue.blocksTillClose();
+    console.log(`Blocks till close: ${_blocksTillClose}`);
+    if (Number(_blocksTillClose.toString()) > 0) {
+      await sleep(5000);
+      await loop();
+    } else {
+      console.timeEnd("time till close");
+    }
+  };
+
+  await loop();
+
+  // close pool
+  await fondue.connect(a).closePreviousRound({ gasLimit: 1000000 });
+
+  await sleep(5000);
+  // get current round
+  currentRound = await fondue.roundId();
+  console.log(`Current round id: ${currentRound}`);
+
+  
+
+  // // attempt to get random number
+  // const randomNumber = await fondue.getRand(100);
+  // console.log(randomNumber.toString());
+
   /*  await YourContract.setPurpose("Hello");
   
     To take ownership of yourContract using the ownable library uncomment next line and add the 
@@ -58,17 +156,5 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
    LibraryName: **LibraryAddress**
   });
   */
-
-  // Verify your contracts with Etherscan
-  // You don't want to verify on localhost
-  if (chainId !== localChainId) {
-    // wait for etherscan to be ready to verify
-    await sleep(15000);
-    await run("verify:verify", {
-      address: YourContract.address,
-      contract: "contracts/YourContract.sol:YourContract",
-      contractArguments: [],
-    });
-  }
 };
-module.exports.tags = ["YourContract"];
+module.exports.tags = ["FonduePot"];

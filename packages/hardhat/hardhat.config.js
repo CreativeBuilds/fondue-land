@@ -311,6 +311,15 @@ module.exports = {
     deployer: {
       default: 0, // here this will by default take the first account as deployer
     },
+    alice: {
+      default: 1,
+    },
+    bob: {
+      default: 2,
+    },
+    charlie: {
+      default: 3,
+    },
   },
   etherscan: {
     apiKey: "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW",
