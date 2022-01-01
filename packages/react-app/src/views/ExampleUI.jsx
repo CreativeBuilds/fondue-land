@@ -155,8 +155,16 @@ export default function ExampleUI({
       */}
       <Events
         contracts={readContracts}
-        contractName="YourContract"
-        eventName="SetPurpose"
+        contractName="FonduePot"
+        eventName="Deposit"
+        localProvider={localProvider}
+        mainnetProvider={mainnetProvider}
+        startBlock={1}
+      />
+      <Events
+        contracts={readContracts}
+        contractName="FonduePot"
+        eventName="Winner"
         localProvider={localProvider}
         mainnetProvider={mainnetProvider}
         startBlock={1}
