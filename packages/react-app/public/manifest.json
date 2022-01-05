@@ -1,7 +1,7 @@
 {
-  "short_name": "🏗 Scaffold-Eth App",
+  "short_name": "Fondue Land",
   "start_url": ".",
-  "name": "🏗 Scaffold-Eth App",
+  "name": "Fondue Land 🧀",
   "icons": [
     {
       "src": "favicon.ico",
@@ -21,6 +21,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "theme_color": "#ffd100",
+  "background_color": "#202020"
 }

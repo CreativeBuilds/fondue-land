@@ -1,8 +1,9 @@
+/* eslint-disable no-unused-vars */
 // deploy/00_deploy_your_contract.js
 
 const { ethers } = require("hardhat");
 
-const localChainId = "31337";
+// const localChainId = "31337";
 
 const sleep = (ms) =>
   new Promise((r) =>
@@ -12,10 +13,14 @@ const sleep = (ms) =>
     }, ms)
   );
 
-module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
+module.exports = async ({
+  getNamedAccounts,
+  deployments,
+  /* getChainId */
+}) => {
   const { deploy } = deployments;
   const { deployer, alice, bob } = await getNamedAccounts();
-  const chainId = await getChainId();
+  // const chainId = await getChainId();
 
   // get signers
   const [d, a, b] = await ethers.getSigners();
@@ -27,18 +32,14 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
     log: true,
   });
 
+  await sleep(5000);
+
   console.log(`Deployed contract @ ${address}`);
   const fondue = await ethers.getContractAt("FonduePot", address);
 
   // load cheez contract using IERC20 interface
-  const cheezAddress = await fondue.CHEEZ();
+  const cheezAddress = await fondue.getCheez();
   const cheez = await ethers.getContractAt("IERC20", cheezAddress);
-
-  // Get cheez balance for alice and bob
-  const aliceCheezBalance = await cheez.balanceOf(alice);
-  const bobCheezBalance = await cheez.balanceOf(bob);
-  console.log(`Alice has ${aliceCheezBalance} cheez`);
-  console.log(`Bob has ${bobCheezBalance} cheez`);
 
   const canDeposit = await fondue.canDeposit();
 
@@ -47,79 +48,90 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
     await fondue.connect(d).initPot();
   }
 
-  // if canDeposit, have account alice deposit 0.01 CHEEZ
-  await cheez.connect(a).approve(address, aliceCheezBalance);
-  // deposit 0.01 CHEEZ
-  await fondue.connect(a).deposit(Math.floor(0.01 * 10 ** 9), {
-    gasLimit: 1000000,
-  });
+  // Get cheez balance for alice and bob
+  // eslint-disable-next-line no-use-before-define
+  // await DepositAliceAndBob();
 
-  // wait for deposit to be processed
-  await sleep(5000);
+  async function DepositAliceAndBob() {
+    const aliceCheezBalance = await cheez.balanceOf(alice);
+    const bobCheezBalance = await cheez.balanceOf(bob);
+    console.log(`Alice has ${aliceCheezBalance} cheez`);
+    console.log(`Bob has ${bobCheezBalance} cheez`);
 
-  let currentRound = await fondue.roundId();
-  console.log(`Current round id: ${currentRound}`);
+    // if canDeposit, have account alice deposit 0.01 CHEEZ
+    await cheez.connect(a).approve(address, aliceCheezBalance);
+    console.log("approved alice to deposit 0.01 cheez");
+    // deposit 0.1 CHEEZ
+    await fondue.connect(a).deposit(Math.floor(0.1 * 10 ** 9), {
+      gasLimit: 1000000,
+    });
+    console.log("deposited");
 
-  // get amount of entries
-  const amountOfEntries = await fondue.getEntries();
-  console.log(`Amount of entries: ${amountOfEntries}`);
+    // wait for deposit to be processed
+    await sleep(5000);
 
-  // get first entry
-  const firstEntry = await fondue.entries(0);
-  console.log(`First entry: ${firstEntry}`);
+    let currentRound = await fondue.roundId();
+    console.log(`Current round id: ${currentRound}`);
 
-  // Get alice win chance
-  const aliceWinChance = await fondue.getWinChance(0).catch((err) => {
-    console.log(err);
-    return -1;
-  });
-  console.log(`Alice win chance: ${aliceWinChance} / 10000`);
+    // get amount of entries
+    const amountOfEntries = await fondue.getEntries();
+    console.log(`Amount of entries: ${amountOfEntries}`);
 
-  // have bob deposit 0.01 cheez
-  await cheez.connect(b).approve(address, bobCheezBalance);
-  // use increased gas limit
-  await fondue.connect(b).deposit(Math.floor(0.01 * 10 ** 9), {
-    gasLimit: 1000000,
-  });
-  console.time("time till close");
+    // get first entry
+    const firstEntry = await fondue.entries(0);
+    console.log(`First entry: ${firstEntry}`);
 
-  // get bobs entry
-  const bobEntry = await fondue.entries(1);
-  console.log(`Bob entry: ${bobEntry}`);
+    // Get alice win chance
+    const aliceWinChance = await fondue.getWinChance(0).catch((err) => {
+      console.log(err);
+      return -1;
+    });
+    console.log(`Alice win chance: ${aliceWinChance} / 10000`);
 
-  // get bobs win chance
-  const bobWinChance = await fondue.getWinChance(1);
-  console.log(`Bob win chance: ${bobWinChance} / 10000`);
+    // have bob deposit 0.01 cheez
+    await cheez.connect(b).approve(address, bobCheezBalance);
+    // use increased gas limit
+    await fondue.connect(b).deposit(Math.floor(0.1 * 10 ** 9), {
+      gasLimit: 1000000,
+    });
+    console.time("time till close");
+    await sleep(5000);
 
-  // get alices new win chance
-  const aliceNewWinChance = await fondue.getWinChance(0);
-  console.log(`Alice new win chance: ${aliceNewWinChance} / 10000`);
+    // get bobs entry
+    const bobEntry = await fondue.entries(1);
+    console.log(`Bob entry: ${bobEntry}`);
 
-  // function that loops until blocksTillClose is 0
-  const loop = async () => {
-    // eslint-disable-next-line no-underscore-dangle
-    const _blocksTillClose = await fondue.blocksTillClose();
-    console.log(`Blocks till close: ${_blocksTillClose}`);
-    if (Number(_blocksTillClose.toString()) > 0) {
-      await sleep(5000);
-      await loop();
-    } else {
-      console.timeEnd("time till close");
-    }
-  };
+    // get bobs win chance
+    const bobWinChance = await fondue.getWinChance(1);
+    console.log(`Bob win chance: ${bobWinChance} / 10000`);
 
-  await loop();
+    // get alices new win chance
+    const aliceNewWinChance = await fondue.getWinChance(0);
+    console.log(`Alice new win chance: ${aliceNewWinChance} / 10000`);
 
-  // close pool
-  await fondue.connect(a).closePreviousRound({ gasLimit: 1000000 });
+    // function that loops until blocksTillClose is 0
+    const loop = async () => {
+      // eslint-disable-next-line no-underscore-dangle
+      const secondsTillClose = await fondue.secondsTillClose().catch(() => 120);
+      console.log(`Blocks till close: ${secondsTillClose}`);
+      if (Number(secondsTillClose.toString()) > 0) {
+        await sleep(5000);
+        await loop();
+      } else {
+        console.timeEnd("time till close");
+      }
+    };
 
-  await sleep(5000);
-  // get current round
-  currentRound = await fondue.roundId();
-  console.log(`Current round id: ${currentRound}`);
+    await loop();
 
-  
+    // close pool
+    await fondue.connect(a).closePreviousRound({ gasLimit: 1000000 });
 
+    await sleep(5000);
+    // get current round
+    currentRound = await fondue.roundId();
+    console.log(`Current round id: ${currentRound}`);
+  }
   // // attempt to get random number
   // const randomNumber = await fondue.getRand(100);
   // console.log(randomNumber.toString());

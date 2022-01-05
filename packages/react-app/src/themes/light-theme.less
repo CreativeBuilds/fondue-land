@@ -3,9 +3,29 @@
 @import "~antd/lib/style/themes/default.less";
 
 // These are shared variables that can be extracted to their own file
-// @primary-color: #00adb5;
+@primary-color: #ffd100;
 @border-radius-base: 4px;
+
+@component-background: #e9e9e9;
+@body-background: #d6d6d6;
+@popover-background: #e9e9e9;
+@border-color-base: #f6f6f6;
+@border-color-split: #e9e9e9;
+@table-header-sort-active-bg: #e9e9e9;
+@card-skeleton-bg: #e9e9e9;
+@skeleton-color: #e9e9e9;
+@table-header-sort-active-bg: #e9e9e9;
+@text-color: #333533;
 
 .highlight {
   background-color: #f9f9f9;
+}
+
+td, tr, th {
+  color: #ffd100;
+}
+
+* {
+  font-family: 'Nunito', sans-serif;
+  transition: background-color 0.3s ease-in-out;
 }

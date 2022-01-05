@@ -3,19 +3,31 @@
 @import "~antd/lib/style/themes/dark.less";
 
 // These are shared variables that can be extracted to their own file
-@primary-color: #2caad9;
+@primary-color: #ffd100;
+@heading-color: #ffd100;
 @border-radius-base: 4px;
 
-@component-background: #212121;
-@body-background: #212121;
-@popover-background: #212121;
-@border-color-base: #6f6c6c;
-@border-color-split: #424242;
-@table-header-sort-active-bg: #424242;
-@card-skeleton-bg: #424242;
-@skeleton-color: #424242;
-@table-header-sort-active-bg: #424242;
+@component-background: #202020;
+@body-background: #202020;
+@popover-background: #202020;
+@border-color-base: #d6d6d6;
+@border-color-split: #333533;
+@table-header-sort-active-bg: #333533;
+@card-skeleton-bg: #333533;
+@skeleton-color: #333533;
+@table-header-sort-active-bg: #333533;
 
 .highlight {
   background-color: #3f3f3f;
+}
+
+td, tr, th {
+  color: #ffd100;
+}
+
+
+* {
+  color: inherit;
+  font-family: 'Nunito', sans-serif;
+  transition: background-color 0.3s ease-in-out;
 }
