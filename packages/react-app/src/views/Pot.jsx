@@ -115,8 +115,14 @@ const PotWrapper = styled.div`
   display: grid;
   grid-template-columns: 1fr;
   height: 100%;
-  div:nth-child(2) {
+  padding-top:7.5vh;
+  & > div:nth-child(2) {
       margin-top: 3vh;
+    }
+
+    & > div:nth-child(3) {
+      display: flex;
+      flex-direction: column
     }
 
   /* when media is larger than mobile increase columns to five */
@@ -136,12 +142,19 @@ const PotWrapper = styled.div`
       margin-top: 0;
       min-width:min-content;
     }
+    & > div:nth-child(3) {
+      grid-row: 2;
+      grid-column: 2 / 7;
+    }
   }
 
   table {
     /* webkit fill content */
     width: -webkit-fill-available;
     margin: 3rem;
+    &.rounds-table{
+      margin-top:0;
+    }
     min-width: 30ch;
     tr {
       position: relative;
@@ -149,22 +162,42 @@ const PotWrapper = styled.div`
       * {
         font-size:1.4rem;
       }
-      th, td {
-        text-align:left;
-        float: left;
-      }
-      th:nth-child(2), td:nth-child(2) {
-        position:absolute;
-        text-align:left;
-        float:left;
-        right:0;
-      }
+      &.players-table {
+        th, td {
+          text-align:left;
+          float: left;
+        }
+        th:nth-child(2), td:nth-child(2) {
+          position:absolute;
+          text-align:left;
+          float:left;
+          right:0;
+        }
 
-      th:nth-child(2){
-        position: inherit;
-        text-align:center;
-        float:unset;
+        th:nth-child(2){
+          position: inherit;
+          text-align:center;
+          float:unset;
+        }
       }
+    }
+  }
+
+  /* when screen width is that of a large monitor */
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(13, 1fr);
+    & > div:nth-child(1) {
+      grid-column: 5 / 10;
+    }
+    & > div:nth-child(2) {
+      grid-column:  10 / 13; 
+      grid-row: 1;
+    }
+    & > div:nth-child(3) {
+      grid-row: 1;
+      grid-column: 1 / 5;
+      display: flex;
+      justify-content: center;
     }
   }
 `;
@@ -176,8 +209,17 @@ const PotWrapper = styled.div`
  */
 function Pot({ address, readContracts, writeContracts, info }) {
   if (!readContracts?.FonduePot) return null;
-  const { totalFunds, roundId, players, totalEntries, FonduePotAddress, myCheezBalance, myCheezAllowance, endDate } =
-    info;
+  const {
+    totalFunds,
+    roundId,
+    roundHistory,
+    players,
+    totalEntries,
+    FonduePotAddress,
+    myCheezBalance,
+    myCheezAllowance,
+    endDate,
+  } = info;
   const [toDeposit, setToDeposit] = React.useState("");
   const [timeLeft, setTimeLeft] = React.useState(0);
   const [locked, setLocked] = React.useState(false);
@@ -196,7 +238,7 @@ function Pot({ address, readContracts, writeContracts, info }) {
   useEffect(() => {
     if (!endDate || isNaN(endDate)) return;
     let i = setInterval(() => {
-      if (Number(endDate?.toString()) == 0) setTimeLeft(0);
+      if (Number(endDate?.toString()) <= 0) setTimeLeft(0);
       setTimeLeft(Number(endDate?.toString()) - Date.now() / 1000);
     }, 100);
     return () => clearInterval(i);
@@ -206,7 +248,7 @@ function Pot({ address, readContracts, writeContracts, info }) {
     <PotWrapper>
       <div>
         <h1 style={{ marginBottom: "1vh" }}>the fondue pot 🧀</h1>
-        <h2 style={{ marginBottom: "5vh" }}>round #{roundId?.toString()}</h2>
+        <h2 style={{ marginBottom: "5vh" }}>round #{(roundId)?.toString()}</h2>
         {/* Create a circle  with a second smaller circle inside of it with the color of the background */}
         <Donut>
           <Doughnut
@@ -230,7 +272,7 @@ function Pot({ address, readContracts, writeContracts, info }) {
           <h1>{formattedFunds} 🧀</h1>
           <h2>
             {timeLeft < 0
-              ? "waiting for deposit"
+              ? "waiting..."
               : (timeLeft < 10 ? Number(timeLeft).toPrecision(2) : Math.floor(timeLeft)) + "s"}
           </h2>
         </Donut>
@@ -275,10 +317,13 @@ function Pot({ address, readContracts, writeContracts, info }) {
             <button disabled>deposit</button>
           )}
         </InputWrapper>
+        <i>5% house fee is applied to pot winnings</i>
+        <br />
+        <i>(MIN / MAX) 0.1 🧀 / 100 🧀</i>
       </div>
       <div>
         {/* Create player table */}
-        <table>
+        <table className="players-table">
           <thead>
             <tr>
               <th>player</th>
@@ -289,17 +334,38 @@ function Pot({ address, readContracts, writeContracts, info }) {
             {players
               .sort((a, b) => b.amount - a.amount)
               .map((entry, index) => (
-              <tr key={index}>
-                <td>{labels[index]}</td>
-                <td>{(entry.amount / 10 ** 9).toFixed(4)} 🧀</td>
-              </tr>
-            ))}
+                <tr key={index}>
+                  <td>{labels[index]}</td>
+                  <td>{(entry.amount / 10 ** 9).toFixed(4)} 🧀</td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
-      <div style={{ gridRow: 2, gridColumn: "2 / 5", display: "flex", flexDirection: "column" }}>
-        <i>5% house fee is applied to pot winnings</i>
-        <i>(MIN / MAX) 0.1 🧀 / 100 🧀</i>
+      <div>
+        <h2 style={{ float: "left", textAlign: "left", marginLeft: "3rem", marginTop: "3rem" }}>Last 10 Rounds</h2>
+        <table className="rounds-table">
+          <thead>
+            <tr>
+              <th>round</th>
+              <th>winner</th>
+              <th>amount</th>
+              <th>chance</th>
+            </tr>
+          </thead>
+          <tbody>
+            {roundHistory
+              .sort((a, b) => b.roundId - a.roundId)
+              .map((round, index) => (
+                <tr key={round.roundId}>
+                  <td>{round.roundId}</td>
+                  <td>{round.winner.slice(0, 5) + "..." + round.winner?.slice(round.winner.length - 3)}</td>
+                  <td>{(Number(round.potValue) / 10 ** 9 + Number(round.potBonus / 10 ** 9)).toFixed(2)} 🧀</td>
+                  <td>{((Number(round.maxRange) - Number(round.minRange)) / 100).toFixed(2)}%</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
       </div>
     </PotWrapper>
   );

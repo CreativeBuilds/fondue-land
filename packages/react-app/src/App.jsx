@@ -31,6 +31,7 @@ import deployedContracts from "./contracts/hardhat_contracts.json";
 import { Transactor, Web3ModalSetup } from "./helpers";
 import { Pot } from "./views";
 import { useStaticJsonRPC } from "./hooks";
+import swal from "sweetalert2";
 
 import { FondueHeader } from "./components/FondueHead";
 
@@ -134,9 +135,7 @@ function App(props) {
   // If you want to make 🔐 write transactions to your contracts, use the userSigner:
   const writeContracts = useContractLoader(userSigner, contractConfig, localChainId);
 
-  const totalFunds = useContractReader(readContracts, "FonduePot", "totalFunds");
-  const roundId = useContractReader(readContracts, "FonduePot", "roundId");
-  const endDate = useContractReader(readContracts, "FonduePot", "endDate"); 
+  const { endDate, totalFunds, roundId, roundHistory } = useGameInfo(readContracts);
 
   const { players, totalEntries } = usePlayers(readContracts, userSigner);
 
@@ -148,7 +147,6 @@ function App(props) {
   // Then read your DAI balance like:
   const myCheezBalance = useContractReader(readContracts, "CHEEZ", "balanceOf", [address]);
   const myCheezAllowance = useContractReader(readContracts, "CHEEZ", "allowance", [address, FonduePotAddress]);
-
 
   const loadWeb3Modal = useCallback(async () => {
     const provider = await web3Modal.connect();
@@ -170,6 +168,31 @@ function App(props) {
       logoutOfWeb3Modal();
     });
   }, [setInjectedProvider]);
+
+  const [listeningToWinner, setListeningToWinner] = useState(false);
+  useEffect(async () => {
+    // setup a listener on the provider to detect the winner of a pot
+    if (!readContracts?.FonduePot?.address || !address || !userProviderAndSigner?.provider || listeningToWinner) return;
+    setListeningToWinner(true);
+    userProviderAndSigner?.provider?.on(
+      readContracts.FonduePot?.filters.Winner(),
+      async (roundId, player, amount, fee, event) => {
+        // log all variables
+        console.log(roundId, player, amount, fee, event);
+        if (player?.toLowerCase() == address?.toLowerCase()) {
+          console.log("YOU WON!");
+          // sweet alert popup with how much the user won in cheese 🧀
+          await swal.fire({
+            title: "You won!",
+            text: `You won ${amount?.toString()} CHEEZ!`,
+            icon: "success",
+            confirmButtonText: "Cool!",
+            timer: 10000,
+          });
+        }
+      },
+    );
+  }, [userProviderAndSigner, address, listeningToWinner]);
 
   useEffect(() => {
     if (web3Modal.cachedProvider) {
@@ -193,6 +216,7 @@ function App(props) {
             info={{
               totalFunds,
               roundId,
+              roundHistory,
               players,
               totalEntries,
               FonduePotAddress,
@@ -250,4 +274,53 @@ function usePlayers(readContracts, userSigner) {
   }, [totalEntries]);
 
   return { players, totalEntries };
+}
+
+function useGameInfo(readContracts, userSigner, maxHistoryLength = 10) {
+  const totalFunds = useContractReader(readContracts, "FonduePot", "totalFunds");
+  const roundId = useContractReader(readContracts, "FonduePot", "roundId");
+  const endDate = useContractReader(readContracts, "FonduePot", "endDate");
+  const [roundHistory, setRoundHistory] = useState([]);
+  const currentRound = roundId ? Number(roundId.toString()) : 0;
+
+  // when roundId updates, check latest round in history, fetch needed rounds and set history
+  useEffect(() => {
+    const highestIdRound = roundHistory.length ? roundHistory[roundHistory.length - 1].roundId : 0;
+    const amountOfRoundsToFetch = currentRound - highestIdRound;
+    if (amountOfRoundsToFetch > 0) {
+      const newRounds = [];
+      for (let i = amountOfRoundsToFetch - 10; i < amountOfRoundsToFetch; i++) {
+        console.log(highestIdRound + i, "wee");
+        newRounds.push(
+          readContracts.FonduePot.rounds(highestIdRound + i).catch(err => {
+            console.error(err);
+            return err.message;
+          }),
+        );
+      }
+      Promise.all(newRounds).then(rounds => {
+        const newHistory = [...roundHistory, ...rounds].sort((a, b) => b.roundId - a.roundId);
+        setRoundHistory(newHistory.slice(-maxHistoryLength));
+      });
+    }
+  }, [currentRound, roundHistory, maxHistoryLength, readContracts, userSigner]);
+  return {
+    endDate,
+    totalFunds,
+    roundId,
+    // format all variables in history
+    roundHistory: roundHistory
+      .filter(x => !!x && typeof x !== "string")
+      .map(i => {
+        return {
+          maxRange: i.maxRange.toString(),
+          minRange: i.minRange.toString(),
+          potBonus: i.potBonus.toString(),
+          potValue: i.potValue.toString(),
+          winner: i.winner,
+          winningNumber: i.winningNumber.toString(),
+          roundId: i.roundId.toString(),
+        };
+      }),
+  };
 }
