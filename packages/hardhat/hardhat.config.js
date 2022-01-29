@@ -28,7 +28,7 @@ const { isAddress, getAddress, formatUnits, parseUnits } = utils;
 //
 const defaultNetwork = "mainnetHarmony";
 
-const mainnetGwei = 21;
+const mainnetGwei = 31;
 
 function mnemonic() {
   try {
@@ -274,8 +274,8 @@ module.exports = {
       },
     },
     mainnetHarmony: {
-      url: "https://api.harmony.one",
-      gasPrice: 1000000000,
+      url: "https://harmony-0-rpc.gateway.pokt.network",
+      gasPrice: 20 * 1000000000,
       chainId: 1666600000,
       accounts: {
         mnemonic: mnemonic(),

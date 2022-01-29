@@ -1,15 +1,25 @@
-type Purpose @entity {
+type Round @entity {
   id: ID!
-  sender: Sender!
-  purpose: String!
+  amount: BigInt!
   createdAt: BigInt!
-  transactionHash: String!
+  entries: [Entry!]!
+  round: Int!
+  winner: Entry!
 }
 
-type Sender @entity {
+type Entry @entity {
+  id: ID!
+  amount: BigInt!
+  createdAt: BigInt!
+  round: Round!
+  sender: Player!
+  won: Boolean!
+}
+
+type Player @entity {
   id: ID!
   address: Bytes!
-  purposes: [Purpose!] @derivedFrom(field: "sender")
   createdAt: BigInt!
-  purposeCount: BigInt!
+  entries: [Entry!]!
 }
+

@@ -5,6 +5,8 @@ const { ethers } = require("hardhat");
 
 // const localChainId = "31337";
 
+const TestAddresses = ["0xB72C0Bd8e68De7de2Bf99abe238Ad7d18F9daaF7"];
+
 const sleep = (ms) =>
   new Promise((r) =>
     setTimeout(() => {
@@ -27,21 +29,35 @@ module.exports = async ({
 
   console.log(deployer, alice, bob);
 
-  const { address } = await deploy("FonduePot", {
+  // get gas price
+  const gasPrice = (await d.provider.getGasPrice()).mul(100).div(80);
+  const fakeCheez = await deploy("FakeCheez", {
     from: deployer,
     log: true,
+    args: [],
+    gasPrice,
   });
-
-  await sleep(5000);
-
-  console.log(`Deployed contract @ ${address}`);
-  const fondue = await ethers.getContractAt("FonduePot", address);
-
-  // load cheez contract using IERC20 interface
-  const cheezAddress = await fondue.getCheez();
-  const cheez = await ethers.getContractAt("IERC20", cheezAddress);
-
-  const canDeposit = await fondue.canDeposit();
+  console.log(`Deployed fakeCheez contract @ ${fakeCheez.address}`);
+  await sleep(2000);
+  const fondue = await deploy("FonduePot", {
+    from: deployer,
+    gasPrice,
+    args: [fakeCheez.address],
+  });
+  console.log(`Deployed fondue contract @ ${fondue.address}`);
+  await sleep(2000);
+  const cheez = await (
+    await ethers.getContractAt("FakeCheez", fakeCheez.address)
+  ).connect(d);
+  // send fakeCheez to TestAddresses
+  // eslint-disable-next-line no-plusplus
+  for (let i = 0; i < TestAddresses.length; i++) {
+    // eslint-disable-next-line no-await-in-loop
+    await cheez.transfer(TestAddresses[i], 1000, {
+      gasPrice,
+    });
+    console.log(`Sent 100 fakeCheez to ${TestAddresses[i]}`);
+  }
 
   // if cant deposit initPot
   if (!canDeposit) {

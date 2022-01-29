@@ -1,7 +1,6 @@
 pragma solidity >=0.8.0 <0.9.0;
 //SPDX-License-Identifier: MIT
 
-import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol"; 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
@@ -13,7 +12,6 @@ contract FonduePot is Ownable {
 
   // Winner event, includes roundId, address, amount, fee
   event Winner(uint256 roundId, address player, uint256 amount, uint256 fee);
-  event PotBonusDeposited(address from, uint256 amount);
 
   // modifier no contracts allowed
   modifier noContractsAllowed {
@@ -21,17 +19,24 @@ contract FonduePot is Ownable {
     _;
   }
 
+  modifier notPaused {
+    require(!isPaused(), "new rounds are currently paused");
+    _;
+  }
+
   uint public max_players = 10;
   uint public min_blocks_to_close = 20; // ensures 20 blocks between depositing and winner getting picked
   uint public round_timer = 120;
+  uint public paused_for = 15; // how long to pause for in blocks if a winner is picked
   bool public canDeposit = false;
-  IERC20 public CHEEZ = IERC20(0xBbD83eF0c9D347C85e60F1b5D2c58796dBE1bA0d);
+  IERC20 public CHEEZ;
   address public feeCollector;
 
   // min deposit 1 with 9 digits with _ every 3 digits
   uint public min_deposit = 100_000_000; // 0.1 CHEEZ
   uint public max_deposit = 100_000_000_000; // 100.0 CHEEZ
   uint public potFee = 500; // 5% fee
+  uint public paused_until = 0; // block number when the pot is unpaused
 
   // Entry struct, address, amount
   struct Entry {
@@ -43,7 +48,6 @@ contract FonduePot is Ownable {
   struct Round {
     uint roundId;
     uint potValue;
-    uint potBonus;
     address winner;
     uint minRange;
     uint maxRange;
@@ -55,12 +59,17 @@ contract FonduePot is Ownable {
   uint public totalFunds;
   uint public roundId;
   uint public endDate;
-  uint public potBonus;
 
   Round[] public rounds;
 
-  constructor() {
+  constructor(address _CHEEZ) {
     feeCollector = msg.sender;
+    CHEEZ = IERC20(_CHEEZ);
+  }
+
+
+  function isPaused() public view returns (bool) {
+    return paused_until != 0 && paused_until > block.number && endDate < block.number;
   }
 
   function secondsTillClose() public view returns (uint) {
@@ -95,6 +104,7 @@ contract FonduePot is Ownable {
       }
       winnerIndex++;
       sum += percent_chance;
+      paused_for = block.number + 15;
     }
 
     uint potValue = CHEEZ.balanceOf(address(this));
@@ -104,7 +114,7 @@ contract FonduePot is Ownable {
     // transfer funds to winner
     CHEEZ.transfer(winner, potValue * (10000 - potFee) / 10000);
     
-    Round memory _round = Round({roundId: roundId, potValue: potValue, potBonus: potBonus, winner: winner, winningNumber: random, minRange:winMin, maxRange: winMax });
+    Round memory _round = Round({roundId: roundId, potValue: potValue, winner: winner, winningNumber: random, minRange:winMin, maxRange: winMax });
     rounds.push(_round);
 
     // loop through entries and delete each
@@ -117,7 +127,6 @@ contract FonduePot is Ownable {
     totalEntries = 0;
     totalFunds = 0;
     endDate = 0;
-    potBonus = 0;
 
     emit Winner(roundId, winner, totalFunds * (10000 - potFee) / 10000, totalFunds * potFee / 10000);
     require(winner != address(0), "No winner");
@@ -134,13 +143,12 @@ contract FonduePot is Ownable {
     if (block.timestamp > endDate && endDate > 0) {
       closePreviousRound();
     }
-
+    require( paused_until != 0 && paused_until > block.number && endDate < block.number, "entries paused");
 
     uint maxEntries = totalEntries;
     uint deposited;
     
     // if no maxEntries, add to currentRound else
-    // Loop through existing entries, increment amount if player already exists, add new entry if not
     if(maxEntries == 0) {
         // First Player;
         entries[0] = (Entry({player: msg.sender, amount: amount}));
@@ -148,7 +156,9 @@ contract FonduePot is Ownable {
         deposited = amount;
         totalFunds = deposited;
     } else {
+    // Loop through existing entries, 
       for (uint i = 0; i < maxEntries; i++) {
+        // increment amount if player already exists, add new entry if not
         if (entries[i].player == msg.sender) {
           // Player already exists, increment amount
 
@@ -168,7 +178,7 @@ contract FonduePot is Ownable {
           break;
         }
 
-        // New player
+        // add entry as new player
         if (i == maxEntries - 1) {
           require(maxEntries < max_players, "Too many players");
           entries[maxEntries] = (Entry({player: msg.sender, amount: amount}));
@@ -194,14 +204,6 @@ contract FonduePot is Ownable {
     emit Deposit(roundId, msg.sender, deposited);
   }
 
-  // used by future contracts to auto deposit cheez and create pots with bonus cheez
-  function depositBonus(uint amount) public noContractsAllowed {
-    require(canDeposit, "can't deposit yet");
-    CHEEZ.transferFrom(msg.sender, address(this), amount);
-    potBonus += amount;
-    emit PotBonusDeposited(msg.sender, amount);
-  }
-
   function getCheez() public view returns(address) {
     return address(CHEEZ);
   }
@@ -225,8 +227,7 @@ contract FonduePot is Ownable {
   }
 
   function getRand(uint modulus) public view noContractsAllowed returns (uint) {
-      return uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp))) % modulus; // use locally generated randomness
-      // return uint(vrf()) % modulus; // TODO use on mainnet
+      return uint(vrf()) % modulus;
   }
   
   // function to initialize the pot, only called by the owner
@@ -234,6 +235,15 @@ contract FonduePot is Ownable {
     canDeposit = true; 
     roundId = 1;
     totalFunds = 0;
+  }
+
+  function setPause(uint pauseUntil) public onlyOwner {
+    paused_until = pauseUntil;
+  }
+
+  function setPausedFor(uint _pauseFor) public onlyOwner {
+    require(_pauseFor > 0, "Invalid pauseFor");
+    paused_for = _pauseFor;
   }
 
   function setFeeCollector(address _feeCollector) public onlyOwner {

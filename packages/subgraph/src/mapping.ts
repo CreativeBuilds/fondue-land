@@ -31,3 +31,10 @@ export function handleSetPurpose(event: SetPurpose): void {
   purpose.save();
   sender.save();
 }
+
+// function handleDeposit
+export function handleDeposit(event: YourContract): void {}
+
+// function handleWinner
+export function handleWinner(event: YourContract): void {}
+// function handlePotBonusDeposited
