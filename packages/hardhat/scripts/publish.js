@@ -34,7 +34,7 @@ function publishContract(contractName, networkName) {
     if (!fs.existsSync(`${graphDir}/abis`)) fs.mkdirSync(`${graphDir}/abis`);
     fs.writeFileSync(
       `${graphDir}/abis/${networkName}_${contractName}.json`,
-      JSON.stringify(contract.abi, null, 2)
+      JSON.stringify(contract, null, 2)
     );
 
     //Hardhat Deploy writes a file with all ABIs in react-app/src/contracts/contracts.json

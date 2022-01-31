@@ -5,7 +5,10 @@ const { ethers } = require("hardhat");
 
 // const localChainId = "31337";
 
-const TestAddresses = ["0xB72C0Bd8e68De7de2Bf99abe238Ad7d18F9daaF7"];
+const TestAddresses = [
+  "0xB72C0Bd8e68De7de2Bf99abe238Ad7d18F9daaF7",
+  "0x3CD98CB8962EbDe57515F8843dd0D2AeE0A6C37B",
+];
 
 const sleep = (ms) =>
   new Promise((r) =>
@@ -35,34 +38,45 @@ module.exports = async ({
     from: deployer,
     log: true,
     args: [],
-    gasPrice,
+    gasPrice: gasPrice.toNumber() * 2,
   });
   console.log(`Deployed fakeCheez contract @ ${fakeCheez.address}`);
   await sleep(2000);
-  const fondue = await deploy("FonduePot", {
+  let fondue = await deploy("FonduePot", {
     from: deployer,
-    gasPrice,
+    gasPrice: gasPrice.toNumber() * 2,
     args: [fakeCheez.address],
   });
   console.log(`Deployed fondue contract @ ${fondue.address}`);
+  fondue = await (
+    await ethers.getContractAt("FonduePot", fondue.address)
+  ).connect(d);
+  
   await sleep(2000);
   const cheez = await (
     await ethers.getContractAt("FakeCheez", fakeCheez.address)
   ).connect(d);
+
   // send fakeCheez to TestAddresses
   // eslint-disable-next-line no-plusplus
   for (let i = 0; i < TestAddresses.length; i++) {
     // eslint-disable-next-line no-await-in-loop
-    await cheez.transfer(TestAddresses[i], 1000, {
-      gasPrice,
+    await cheez.transfer(TestAddresses[i], 1000 * 10 ** 9, {
+      gasPrice: gasPrice.toNumber() * 2,
     });
-    console.log(`Sent 100 fakeCheez to ${TestAddresses[i]}`);
+    console.log(`Sent 1000 fakeCheez to ${TestAddresses[i]}`);
   }
+
+  const canDeposit = await fondue.canDeposit();
 
   // if cant deposit initPot
   if (!canDeposit) {
-    await fondue.connect(d).initPot();
+    console.log("Initializing fondue pot...");
+    await fondue.connect(d).initPot({ gasPrice: gasPrice.toNumber() * 2 });
+    console.log("Initialized fondue pot");
   }
+
+  console.log("ready...");
 
   // Get cheez balance for alice and bob
   // eslint-disable-next-line no-use-before-define

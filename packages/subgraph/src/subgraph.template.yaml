@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: FonduePot
-    network: localhost
+    network: mainnet
     source:
-      address: "{{mainnetHarmony_FonduePot}}"
+      address: "{{mainnetHarmony_FonduePotAddress}}"
       abi: FonduePot
-      startBlock: 22237213
+      startBlock: 22323853
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -20,9 +20,11 @@ dataSources:
       abis:
         - name: FonduePot
           file: ./abis/mainnetHarmony_FonduePot.json
+        - name: FakeCheez
+          file: ./abis/mainnetHarmony_FakeCheez.json
       eventHandlers:
-        - event: Deposit(uint256, address, uint256)
+        - event: Deposit(uint256,address,uint256)
           handler: handleDeposit
-        - event: Winner(uint256, address, uint256)
+        - event: Winner(uint256,address,uint256,uint256)
           handler: handleWinner
       file: ./src/mapping.ts

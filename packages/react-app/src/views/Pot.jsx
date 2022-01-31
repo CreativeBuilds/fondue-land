@@ -360,7 +360,7 @@ function Pot({ address, readContracts, writeContracts, info }) {
                 <tr key={round.roundId}>
                   <td>{round.roundId}</td>
                   <td>{round.winner.slice(0, 5) + "..." + round.winner?.slice(round.winner.length - 3)}</td>
-                  <td>{(Number(round.potValue) / 10 ** 9 + Number(round.potBonus / 10 ** 9)).toFixed(2)} 🧀</td>
+                  <td>{(Number(round.potValue) / 10 ** 9).toFixed(2)} 🧀</td>
                   <td>{((Number(round.maxRange) - Number(round.minRange)) / 100).toFixed(2)}%</td>
                 </tr>
               ))}

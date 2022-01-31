@@ -315,7 +315,6 @@ function useGameInfo(readContracts, userSigner, maxHistoryLength = 10) {
         return {
           maxRange: i.maxRange.toString(),
           minRange: i.minRange.toString(),
-          potBonus: i.potBonus.toString(),
           potValue: i.potValue.toString(),
           winner: i.winner,
           winningNumber: i.winningNumber.toString(),

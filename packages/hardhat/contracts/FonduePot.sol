@@ -143,7 +143,7 @@ contract FonduePot is Ownable {
     if (block.timestamp > endDate && endDate > 0) {
       closePreviousRound();
     }
-    require( paused_until != 0 && paused_until > block.number && endDate < block.number, "entries paused");
+    require( (paused_until != 0 && paused_until > block.number && endDate < block.number) || paused_until == 0, "entries paused");
 
     uint maxEntries = totalEntries;
     uint deposited;
