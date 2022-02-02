@@ -34,6 +34,7 @@ import { useStaticJsonRPC } from "./hooks";
 import swal from "sweetalert2";
 
 import { FondueHeader } from "./components/FondueHead";
+import { useGameInfo } from "./hooks/useGameInfo";
 
 const { ethers } = require("ethers");
 /*
@@ -276,50 +277,4 @@ function usePlayers(readContracts, userSigner) {
   return { players, totalEntries };
 }
 
-function useGameInfo(readContracts, userSigner, maxHistoryLength = 10) {
-  const totalFunds = useContractReader(readContracts, "FonduePot", "totalFunds");
-  const roundId = useContractReader(readContracts, "FonduePot", "roundId");
-  const endDate = useContractReader(readContracts, "FonduePot", "endDate");
-  const [roundHistory, setRoundHistory] = useState([]);
-  const currentRound = roundId ? Number(roundId.toString()) : 0;
 
-  // when roundId updates, check latest round in history, fetch needed rounds and set history
-  useEffect(() => {
-    const highestIdRound = roundHistory.length ? roundHistory[roundHistory.length - 1].roundId : 0;
-    const amountOfRoundsToFetch = currentRound - highestIdRound;
-    if (amountOfRoundsToFetch > 0) {
-      const newRounds = [];
-      for (let i = amountOfRoundsToFetch - 10; i < amountOfRoundsToFetch; i++) {
-        console.log(highestIdRound + i, "wee");
-        newRounds.push(
-          readContracts.FonduePot.rounds(highestIdRound + i).catch(err => {
-            console.error(err);
-            return err.message;
-          }),
-        );
-      }
-      Promise.all(newRounds).then(rounds => {
-        const newHistory = [...roundHistory, ...rounds].sort((a, b) => b.roundId - a.roundId);
-        setRoundHistory(newHistory.slice(-maxHistoryLength));
-      });
-    }
-  }, [currentRound, roundHistory, maxHistoryLength, readContracts, userSigner]);
-  return {
-    endDate,
-    totalFunds,
-    roundId,
-    // format all variables in history
-    roundHistory: roundHistory
-      .filter(x => !!x && typeof x !== "string")
-      .map(i => {
-        return {
-          maxRange: i.maxRange.toString(),
-          minRange: i.minRange.toString(),
-          potValue: i.potValue.toString(),
-          winner: i.winner,
-          winningNumber: i.winningNumber.toString(),
-          roundId: i.roundId.toString(),
-        };
-      }),
-  };
-}

@@ -2,7 +2,7 @@ type Round @entity {
   id: ID!
   amount: BigInt!
   createdAt: BigInt!
-  entries: [Entry!]!
+  entries: [Entry]!
   winner: Entry
 }
 
@@ -23,4 +23,3 @@ type Player @entity {
   totalBet: BigInt!
   totalWon: BigInt!
 }
-

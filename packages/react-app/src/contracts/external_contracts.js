@@ -789,7 +789,7 @@ module.exports = {
   1666600000: {
     contracts: {
       CHEEZ: {
-        address: "0x72D1Ae1CFe72d80e5F76358cF58F08cEaD682d50", // FakeCheez
+        address: "0x89483665d9C3a0247DA9d2E7420aDcD64Fb957e3", // FakeCheez
         abi: ERC20ABI,
       },
     }

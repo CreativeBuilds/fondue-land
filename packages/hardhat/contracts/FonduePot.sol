@@ -122,13 +122,13 @@ contract FonduePot is Ownable {
       delete entries[i];
     }
 
+    emit Winner(roundId, winner, totalFunds * (10000 - potFee) / 10000, totalFunds * potFee / 10000);
     // reset currentRound
     roundId++;
     totalEntries = 0;
     totalFunds = 0;
     endDate = 0;
 
-    emit Winner(roundId, winner, totalFunds * (10000 - potFee) / 10000, totalFunds * potFee / 10000);
     require(winner != address(0), "No winner");
     return winner;
   }
@@ -139,11 +139,11 @@ contract FonduePot is Ownable {
     require(canDeposit, "Can't deposit yet");
     require(amount >= min_deposit, "Not enough CHEEZ");
 
+    require( (paused_until != 0 && paused_until > block.number && endDate < block.number) || paused_until == 0, "round is closed");
     // if past endDate, closePreviousRound
     if (block.timestamp > endDate && endDate > 0) {
       closePreviousRound();
     }
-    require( (paused_until != 0 && paused_until > block.number && endDate < block.number) || paused_until == 0, "entries paused");
 
     uint maxEntries = totalEntries;
     uint deposited;
