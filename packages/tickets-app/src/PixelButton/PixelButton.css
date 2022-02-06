@@ -1,0 +1,52 @@
+
+.PixelButton {
+    box-sizing: border-box;
+    position: relative;
+    z-index: 2;
+    /* min-height: 4em; */
+}
+
+.PixelButton:hover {
+    cursor: pointer;
+}
+
+.PixelButton-background {
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top:0;
+    left:0;
+    background: #FFD500;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    border: 8px solid #FFE251;
+    transition: all 0.2s ease-in-out;
+}
+
+.PixelButton:hover .PixelButton-background {
+    background: #FFE251;
+}
+.PixelButton:active .PixelButton-background {
+    background: #DEB900;
+    border-color: #DEB900;
+}
+
+.PixelButton-shadow {
+    position: absolute;
+    bottom:  -8px;
+    right: -8px;
+    width: calc(100%);
+    height: calc(100%);
+    z-index: 1;
+    background: #DEB900;
+}
+
+.PixelButton-content {
+    z-index: 3;
+    width: 100%;
+    height: 100%;
+}

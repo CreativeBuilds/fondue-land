@@ -1,0 +1,245 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 2em;
+}
+
+.App-header {
+  background-color: #E5E5E5;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  padding-top: 2.5em;
+  box-sizing: border-box;
+  /* color: #0C0B0B; */
+  color: #f5f5f5;
+}
+
+.App-header p {
+  margin: unset;
+  margin-bottom: 0.25em;
+  text-shadow: 0.0625em 0.0625em 0.0625em #212521cc;
+  letter-spacing: 0.05em;
+}
+.App-header p, .App-header h3 {
+  color: #0C0B0B;
+}
+.App-header h3, .App-header h4 {
+  margin: unset;
+  margin-bottom: 0.25em;
+  text-shadow: 0.0625em 0.0625em 0.0625em #212521cc;
+  letter-spacing: 0.05em;
+  
+}
+
+.App-header h4 {
+  margin-top: 0.75em;
+}
+
+.App-header-bar {
+  background-color: #0C0B0B;
+  position: absolute;
+  height: 3em;
+  width: calc(100% - 1em);
+  top: 0;
+  left: 0;
+  box-shadow: 0.5em 0.5em #21865B;
+  /* outline: 0.3em solid #c4d6c433;
+  outline-offset: 0.15em;
+  outline-style: groove; */
+  display: flex;
+  align-items: center;
+  padding: 0.5em;
+  box-sizing: border-box;
+}
+
+
+.App-header-bar button {
+  float: right;
+  margin-left: auto;
+}
+
+button {
+  outline: unset;
+  border: unset;
+  font-weight: bolder;
+}
+
+/* button {
+  background-color: #FFE251dd;
+  color: #191a19;
+  border: none;
+  padding: 0.4em 0.5em;
+  font-size: 0.7em;
+  cursor: pointer;
+  box-shadow: 0.1em 0.1em 0 0 rgba(255,255,255, 0.4);
+  font-weight: bolder;
+  border-radius: 0px 5px 0px 5px;
+  transition: all 0.25s ease;
+}
+
+button:hover, button:active {
+  background-color: #FFE251;
+  color: #191a19cc;
+  box-shadow: 0.1em 0.1em 0 0 rgba(255,255,255, 1);
+}
+
+button:disabled {
+  background-color: #695e23cc;
+  color: #525041cc;
+  box-shadow: 0.1em 0.1em 0 0 rgba(255,255,255, 0.1);
+  cursor: unset;
+} */
+
+.App-bar-right {
+  float: right;
+}
+
+/* App content */
+.App-presale {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  padding: 1em;
+  padding-top: 2em;
+  box-sizing: border-box;
+}
+
+.App-presale-dialog {
+  background: rgb(132, 172, 133);
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+  max-width: calc(100vw - 2em);
+  margin-top:0.5em;
+  position: relative;
+  padding: 0.5em 0.25em;
+  padding-top: 3em;
+  color: #0C0B0B;
+
+}
+
+
+
+.App-presale-total-minted {
+  position:absolute;
+  width: calc(100%);
+  height: 2em;
+  top:0.75em;
+  left: 0.75em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.App-presale-total-minted > span {
+  font-size: 0.8em;
+  z-index:2;
+  text-shadow: 0.0625em 0.0625em 0.0625em #212521cc;
+}
+
+.App-presale-total-minted .progress {
+  background: #FFE251;
+  box-shadow: 0.1em 0.1em 0 0 rgba(255,255,255, 0.2);
+  height: inherit;
+  position: absolute;
+  top: -0.05em;
+  left: -0.05em;
+  width: 100.5%;
+}
+
+
+
+.input-wrapper {
+  position: relative;
+  margin: 0.25em 0;
+  text-shadow: 0.0625em 0.0625em 0.0625em #212521cc;
+  display: inline-block;
+  margin: auto;
+  margin-bottom: 0.75em;
+}
+.input-label {
+  position: absolute;
+  z-index: 4;
+  top: 0.325em;
+  right: 0.325em;
+  font-size: 1.5em;
+}
+.input-message {
+  position: absolute;
+  z-index: 4;
+  left: 0em;
+  bottom: -2em;
+  font-size: 0.5em;
+  font-weight: bolder;
+}
+ .mice-input {
+  position: relative;
+  padding: 0 0.5em;
+  /* outline: 5px solid #FFE25133;
+  outline-offset: 1px;
+  outline-style: groove; */
+  border: unset;
+  border-radius: 0.15em;
+  height: 3em;
+  width: calc(100%);
+  /* text-align: center; */
+  box-sizing: border-box;
+  background:#F4FBD7;
+  color: #939393;
+  font-weight: bolder;
+  font-size: 1em;
+}
+.arrow-box {
+  position: relative;
+  height: 0.75em;
+  z-index:4;
+}
+.arrow-box:hover {
+  cursor: default;
+}
+.arrow-box > span {
+  background: #313030;
+  padding: 0.5em;
+  z-index: 4;
+  font-size: 1.5em;
+  margin-left: -1em;
+  margin-top: -1.25em;
+  position: absolute;
+  border-radius: 0.5ch;
+}
+.mice-input::placeholder {
+  color: #939393;
+
+  opacity: 1;
+}
+.mice-to-keys {
+  margin-bottom: 0.25em;
+}
+.mice-to-keys span {
+  font-size: 0.75em;
+}
+.keys {
+  font-size: 0.66em;
+  font-weight: bolder;
+
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
