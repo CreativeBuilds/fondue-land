@@ -3,10 +3,9 @@
 pragma solidity ^0.8.0;
 
 // import ownable contract
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
-import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Receiver.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 
 /**
  * @title FondueTickets
@@ -15,15 +14,15 @@ import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Receiver.sol";
  * @dev each ticket added adds 5 minutes to the pots timer and increases the price to mint further tickets
 
     * SALE / MINT INFO *
- * @dev the presale will last for 50000 blocks or until 1k mice are raised
+ * @dev the presale will last for totalBlocksToMint (50000) blocks or until 1k mice are raised
  * @dev mice will be sent to treasury addressed to be staked in the maze
 
     * POT INFO *
  * @dev the pot will be a seperate contract that will be released seperately after the initial minting
  */ 
 
-abstract contract FondueTickets is ERC1155, ERC1155Receiver, Ownable {
-    ERC1155 public MouseContract;
+contract FondueTickets is ERC1155, IERC1155Receiver {
+    ERC1155 public MouseContract = ERC1155(0x4e9c30CbD786549878049f808fb359741BF721ea);
     uint256 public constant TICKET = 0;
 
     uint public CHEEZ_PRICE = 5000; // out of 10000 (0.5 CHEEZ)
@@ -35,29 +34,40 @@ abstract contract FondueTickets is ERC1155, ERC1155Receiver, Ownable {
     uint public totalTicketsMinted = 0;
     uint public totalTicketsMintedAtPresale = 0;
 
-    IERC20 public CheezToken;
-    address public treasury;
-
+    IERC20 public CheezToken = IERC20(0xBbD83eF0c9D347C85e60F1b5D2c58796dBE1bA0d);
+    address public treasury = address(0xD9d54CFFe5BbBb0633AEc3739488dfD0a00BeF5E);
+ 
+    uint public totalBlocksToMint = 50000;
     uint public maxTicketsFromPresale = 24000;
     uint public ticketsPerMouse = 24;
+    uint public maxMicePerTx = 100;
 
     event TicketPurchase(address purchaser, uint256 value, uint256 cost, bool isPresale);
 
     modifier isInPresale {
-        require(block.number > presaleStartBlock && block.number < presaleStartBlock + 50000 && totalTicketsMintedAtPresale < maxTicketsFromPresale, "Presale is over");
+        require(block.number > presaleStartBlock && block.number < presaleStartBlock + totalBlocksToMint && totalTicketsMintedAtPresale < maxTicketsFromPresale, "Presale is over");
+        _;
+    }
+
+    modifier isAfterPresale {
+        require(block.number > presaleStartBlock + totalBlocksToMint || totalTicketsMinted > maxTicketsFromPresale, "Presale is over");
         _;
     }
     
-    constructor(uint256 _presaleStartBlock, ERC1155 _MouseContract, IERC20 _cheezToken, address _treasury) ERC1155("https://fondue.land/api/token/1/${id}.json") {
-        require(_presaleStartBlock > block.number + 1);
-        presaleStartBlock = _presaleStartBlock;
-        MouseContract = _MouseContract;
-        CheezToken = _cheezToken;
-        treasury = _treasury;
+    constructor(uint256 _presaleStartBlock) ERC1155("https://fondue.land/api/token/0/${id}.json") {
+        if(_presaleStartBlock >= block.number) {
+            presaleStartBlock = _presaleStartBlock;
+        } else {
+            presaleStartBlock = block.number;
+        }
+    }
+
+    function timeTillPresaleEnds() public view isInPresale returns (uint)  {
+        return presaleStartBlock + totalBlocksToMint - block.number;
     }
 
     // @dev calculates average ticket cost and optimistically transfers tokens to the pot 
-    function purchaseWithCheese(uint256 _value) external {
+    function purchaseWithCheese(uint256 _value) external isAfterPresale {
         uint256 currentPrice = getPrice(totalTicketsMinted);
         uint256 priceAfter = getPrice(totalTicketsMinted + (_value-1));
 
@@ -69,16 +79,12 @@ abstract contract FondueTickets is ERC1155, ERC1155Receiver, Ownable {
         emit TicketPurchase(msg.sender, _value, cheeseCost, false);
     }
 
-    function purchaseWithTraps(uint256 _value) external isInPresale  {
-        MouseContract.safeTransferFrom(msg.sender, address(this), 1, _value, "");
+    function purchaseWithMice(uint256 _value) external isInPresale  {
+        MouseContract.safeTransferFrom(msg.sender, address(this), 0, _value, "");
     }
 
     function totalTicketSupply() public view returns(uint256)  {
         return totalTicketsMinted + totalTicketsMintedAtPresale;
-    }
-
-    function setPresale (bool isPresale) public onlyOwner {
-        _isPresale = isPresale;
     }
 
     function getPrice(uint256 amountMinted) public view returns(uint256) {
@@ -93,7 +99,7 @@ abstract contract FondueTickets is ERC1155, ERC1155Receiver, Ownable {
         require(operator == address(MouseContract), "unauthorized");
         require(id == 1, "incorrect nft");
         require(value > 0, "invalid value");
-        require(value <= 20, "max per tx is 20 mice");
+        require(value <= maxMicePerTx, "max per tx exceeded");
 
         uint amountToMint = ticketsPerMouse * value;
         totalTicketsMintedAtPresale += amountToMint;
@@ -103,7 +109,11 @@ abstract contract FondueTickets is ERC1155, ERC1155Receiver, Ownable {
         return bytes4(keccak256("onERC1155Received(address,address,uint256[],uint256[],bytes)"));
     }
 
-    function supportsInterface(bytes4 interfaceID) override(ERC1155, ERC1155Receiver) public pure returns (bool) {
+    function onERC1155BatchReceived(address operator, address from, uint256[] memory ids, uint256[] memory values, bytes calldata data) override pure public returns(bytes4) {
+        require(false == true, "batch not supported");
+    }
+
+    function supportsInterface(bytes4 interfaceID) override(ERC1155, IERC165) public pure returns (bool) {
         return true;
     }
 }

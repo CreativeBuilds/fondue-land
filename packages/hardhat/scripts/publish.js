@@ -3,7 +3,7 @@ const chalk = require("chalk");
 
 const graphDir = "../subgraph";
 const deploymentsDir = "./deployments";
-const publishDir = "../react-app/src/contracts";
+const publishDir = "../tickets-app/src/contracts";
 
 function publishContract(contractName, networkName) {
   try {
@@ -35,23 +35,26 @@ function publishContract(contractName, networkName) {
     fs.writeFileSync(
       `${graphDir}/abis/${networkName}_${contractName}.json`,
       JSON.stringify(contract, null, 2)
-    );
+      );
 
-    //Hardhat Deploy writes a file with all ABIs in react-app/src/contracts/contracts.json
-    //If you need the bytecodes and/or you want one file per ABIs, un-comment the following block.
-    //Write the contracts ABI, address and bytecodes in case the front-end needs them
-    // fs.writeFileSync(
-    //   `${publishDir}/${contractName}.address.js`,
-    //   `module.exports = "${contract.address}";`
-    // );
-    // fs.writeFileSync(
-    //   `${publishDir}/${contractName}.abi.js`,
-    //   `module.exports = ${JSON.stringify(contract.abi, null, 2)};`
-    // );
-    // fs.writeFileSync(
-    //   `${publishDir}/${contractName}.bytecode.js`,
-    //   `module.exports = "${contract.bytecode}";`
-    // );
+      //Hardhat Deploy writes a file with all ABIs in react-app/src/contracts/contracts.json
+      //If you need the bytecodes and/or you want one file per ABIs, un-comment the following block.
+      //Write the contracts ABI, address and bytecodes in case the front-end needs them
+      if (!fs.existsSync(publishDir)) {
+        fs.mkdirSync(publishDir);
+      }
+      fs.writeFileSync(
+      `${publishDir}/${contractName}.address.js`,
+      `module.exports = "${contract.address}";`
+    );
+    fs.writeFileSync(
+      `${publishDir}/${contractName}.abi.js`,
+      `module.exports = ${JSON.stringify(contract.abi, null, 2)};`
+    );
+    fs.writeFileSync(
+      `${publishDir}/${contractName}.bytecode.js`,
+      `module.exports = "${contract.bytecode}";`
+    );
 
     return true;
   } catch (e) {

@@ -5,13 +5,20 @@ interface EthereumProvider {
     isMetaMask?: boolean;
 }
 
-function useProvider() {
+function useProvider(shouldSignIn: boolean = true) {
     const [provider, setProvider] = useState<ethers.providers.Web3Provider | null>(null);
+    const [signer, setSigner] = useState<ethers.Signer | null>(null);
     const [accounts, setAccounts] = useState<string[]>([]);
+
+    useEffect(() => {
+        /* If user has "logged out" clear signer */
+        if(!shouldSignIn && signer) setSigner(null);
+    }, [shouldSignIn, signer])
+
+    /* Detect base web3 provider / accounts (read only) */
     useEffect(() => {
         (async () => {
             let provider = await detectEthereumProvider();
-            console.log("got provider", provider);
             const ethersProvider = new ethers.providers.Web3Provider(provider as EthereumProvider);
             setProvider(ethersProvider);
             const accounts = await ethersProvider.listAccounts();
@@ -19,6 +26,7 @@ function useProvider() {
         })();
     }, []);
 
+    /* listen to accounts change, and update state accordingly */
     useEffect(() => {
         if (provider) {
             provider.on('accountsChanged', (accounts: string[]) => {
@@ -27,24 +35,36 @@ function useProvider() {
         }
     }, [provider]);
 
+    /* Detect signer (read/write) if shouldSignIn */
     useEffect(() => {
-        console.log("accounts changed", accounts);
-    }, [accounts]);
-    
-    return {accounts, provider, getSigner, signOut};
+        if (provider && accounts.length > 0) {
+            (async () => {
+                const signer = await getSigner();
+                if(signer)
+                    setSigner(signer);
 
-    async function getSigner() {
-        if(!accounts || accounts.length === 0) {
-            await provider?.send('eth_requestAccounts', []).then(setAccounts);
-            return provider?.getSigner();
+                async function getSigner() {
+                    if(!accounts || accounts.length === 0) {
+                        if(shouldSignIn) await provider?.send('eth_requestAccounts', []).then(setAccounts);
+                        return provider?.getSigner();
+                    }
+                    if(provider && shouldSignIn)
+                        return provider.getSigner();
+                    else
+                        return null;
+                }
+            })();
+        } else {
+            setSigner(null);
         }
-        if(provider)
-            return provider.getSigner();
-    }
+    }, [provider, accounts, shouldSignIn]);
+    
+    return {accounts, provider, signer, signOut};
     
     async function signOut() {
         setAccounts([]);
     }
+    
 }
 
 useProvider.prototype.Provider = ethers.providers.Web3Provider;
