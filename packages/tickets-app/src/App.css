@@ -7,6 +7,10 @@
   height: 2em;
 }
 
+body, div.App, header.App-header {
+  background-color: #E5E5E5;
+}
+
 .App-header {
   background-color: #E5E5E5;
   height: 100vh;
@@ -31,6 +35,7 @@
 }
 .App-header p, .App-header h3 {
   color: #0C0B0B;
+  padding-left: 0.75em;
 }
 .App-header h3, .App-header h4 {
   margin: unset;
@@ -53,13 +58,12 @@
   top: 0;
   left: 0;
   box-shadow: 0.5em 0.5em #21865B;
-  /* outline: 0.3em solid #c4d6c433;
-  outline-offset: 0.15em;
-  outline-style: groove; */
   display: flex;
   align-items: center;
   padding: 0.5em;
   box-sizing: border-box;
+  max-width: 100vw;
+  overflow: hidden;
 }
 
 
@@ -72,6 +76,14 @@ button {
   outline: unset;
   border: unset;
   font-weight: bolder;
+}
+
+.App-fondue-info {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 /* button {
@@ -107,13 +119,14 @@ button:disabled {
 /* App content */
 .App-presale {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   align-items: center;
   padding: 0.5em;
   box-sizing: border-box;
   width: 100%;
-  height: 100%;
-  max-height: 100%;
+  margin-top: 3ch;
+  position: absolute;
+  top: 0;
 }
 .App-presale-mint {
   display: flex;
@@ -186,9 +199,12 @@ button:disabled {
 .input-label {
   position: absolute;
   z-index: 4;
-  top: 0.325em;
-  right: 0.325em;
+  top: 0.325rem;
+  right: 0.325rem;
   font-size: 1.5em;
+}
+.input-label.mice {
+  top: 0em;
 }
 .input-message {
   position: absolute;
@@ -198,6 +214,28 @@ button:disabled {
   font-size: 0.5em;
   font-weight: bolder;
 }
+
+.max-mice {
+  position: absolute;
+  z-index: 4;
+  right: 3rem;
+  bottom: 1rem;
+  font-size: 0.3em;
+  font-weight: bolder;
+  width: 10ch;
+}
+
+.max-mice > span {
+  font-size: 0.7rem;
+}
+.max-mice > button {
+  position: absolute;
+  bottom: -0.25em;
+  right: 0.3em;
+  padding: 1em;
+  padding-left: 3.5ch;
+}
+
  .mice-input {
   position: relative;
   padding: 0 0.5em;
@@ -211,9 +249,19 @@ button:disabled {
   /* text-align: center; */
   box-sizing: border-box;
   background:#F4FBD7;
-  color: #939393;
+  color: #0C0B0B;
   font-weight: bolder;
   font-size: 1em;
+}
+.mice-input::placeholder {
+  color: #939393;
+}
+.mice-balance {
+  position: absolute;
+  bottom:0.1ch;
+  z-index: 4;
+  right:1ch;
+  font-size: 0.8em;
 }
 .arrow-box {
   position: relative;
@@ -261,5 +309,24 @@ button:disabled {
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* media query for phones to make header bar text smaller */
+@media screen and (max-width: 600px) {
+  .App-header-bar button {
+    min-width: 6ch !important;
+  }
+  .App-header-bar .App-header-bar-account, .App-header-bar button div.PixelButton-background {
+    font-size: 0.4em;
+  }
+  .App-presale-info {
+    font-size: 0.6em;
+    min-width: 100%
+  }
+  .PixelBox {
+    padding: 1.5ch;
+    padding-left: 2ch !important;
+    min-width: unset !important;
   }
 }

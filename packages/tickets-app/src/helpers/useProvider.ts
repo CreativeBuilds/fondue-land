@@ -13,6 +13,10 @@ function useProvider(shouldSignIn: boolean = true) {
     useEffect(() => {
         /* If user has "logged out" clear signer */
         if(!shouldSignIn && signer) setSigner(null);
+        else if (signer) {
+            /* If user has "logged in" update accounts */
+            signer?.getAddress().then(acc => setAccounts([acc]));
+        }
     }, [shouldSignIn, signer])
 
     /* Detect base web3 provider / accounts (read only) */
@@ -30,6 +34,7 @@ function useProvider(shouldSignIn: boolean = true) {
     useEffect(() => {
         if (provider) {
             provider.on('accountsChanged', (accounts: string[]) => {
+                console.log(accounts, "REEE")
                 setAccounts(accounts);
             });
         }
@@ -37,11 +42,11 @@ function useProvider(shouldSignIn: boolean = true) {
 
     /* Detect signer (read/write) if shouldSignIn */
     useEffect(() => {
-        if (provider && accounts.length > 0) {
+        if (provider) {
             (async () => {
                 const signer = await getSigner();
                 if(signer)
-                    setSigner(signer);
+                    setSigner(signer as any);
 
                 async function getSigner() {
                     if(!accounts || accounts.length === 0) {
@@ -57,7 +62,7 @@ function useProvider(shouldSignIn: boolean = true) {
         } else {
             setSigner(null);
         }
-    }, [provider, accounts, shouldSignIn]);
+    }, [provider, shouldSignIn]);
     
     return {accounts, provider, signer, signOut};
     

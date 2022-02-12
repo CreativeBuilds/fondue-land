@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './App.css';
 import detectEthereumProvider from '@metamask/detect-provider';
 import useProvider from './helpers/useProvider';
@@ -8,14 +8,19 @@ import { PixelButton } from './PixelButton/PixelButton';
 import { useContract } from './helpers/useContract';
 import { Signer } from 'ethers';
 import { useFondueTickets } from './helpers/useFondueTickets';
+import {NotificationContainer, NotificationManager} from 'react-notifications';
+import 'react-notifications/lib/notifications.css';
 
 function App() {
   const [mice, setMice] = React.useState(0);
-  const [shouldLogin, setShouldLogin] = React.useState(false);
+  const [shouldLogin, setShouldLogin] = React.useState(true);
   
   const {accounts, signer, provider} = useProvider(shouldLogin);
-  const {price, minted, endDate, purchaseWithMice} = useFondueTickets(signer ? signer : (provider as any))
-
+  const {price, minted, approvedFor, keyBalance, miceBalance, endDate, approveAllMice, purchaseWithMice} = useFondueTickets(signer ? signer : (provider as any))
+  
+  useEffect(() => {
+    if(!signer) UpdateMice(0);
+  }, [signer])
 
   const MAX_MICE_PER_TX = 100;
 
@@ -30,7 +35,7 @@ function App() {
             !signer ?
             <PixelButton style={{marginTop:'-0.5em', minWidth: '8ch', height: '2ch', marginRight:'1ch'}} onClick={() => setShouldLogin(true)}>CONNECT</PixelButton> :
             <>
-            <div style={{marginLeft: 'auto'}}>{accounts[0].slice(0, 5)}...{accounts[0].slice(-3)}</div>
+            <div className="App-header-bar-account" style={{marginLeft: 'auto'}}>{accounts[0].slice(0, 5)}...{accounts[0].slice(-3)}</div>
             <PixelButton style={{marginLeft: '1em', marginTop:'-0.5em', minWidth: '11ch', height: '2ch', marginRight:'1ch'}} onClick={() => setShouldLogin(false)}>DISCONNECT</PixelButton>
             </>
           }
@@ -38,7 +43,7 @@ function App() {
         </div>
         <div className="App-presale">
           <div className="App-fondue-info">
-            <p>info board</p>
+            <p>INFO BOARD</p>
             <PixelBox className="App-presale-info">
               <span style={{fontSize:'0.75em'}}>welcome to the fondue.land presale</span>
               <br/>
@@ -46,10 +51,10 @@ function App() {
               <span style={{fontSize:'0.75em'}}>trade your cheesedao mice for <b style={{fontSize:'1em', color: 'white'}}>keys</b>. keys can later be entered for a chance to win a jackpot of mice</span>
               <br/>
               <br/>
-              <span style={{fontSize:'0.75em'}}><b style={{fontSize:'1em', color: 'white'}}>CHEEZ</b> earned from mice will be distributed pro-rata to players based off of how many keys they've entered</span>
+              <span style={{fontSize:'0.75em'}}><b style={{fontSize:'1em', color: 'white'}}>CHEEZ</b> earned from mice will be used to buy mice off market to increase the <b style={{fontSize: '1em', color:'white'}}>Fondue Pots</b> value</span>
               <br/>
               <br/>
-              <span style={{fontSize:'0.75em'}}>More info and docs will be released after presale, at which point keys can be minted with <b style={{fontSize:'1em', color: 'white'}}>CHEEZ</b></span>
+              <span style={{fontSize:'0.75em'}}>Keys can be minted post-presale, the profits of which will be redistributed pro-rata to all cheezers inside the <b style={{fontSize:'1em', color: 'white'}}>Fondue Pot</b></span>
               <br/>
               <br/>
               <span style={{fontSize:'0.75em'}}>For more info ask for <b style={{fontSize:'1em', color: 'white'}}>creative</b> on <a 
@@ -75,35 +80,47 @@ function App() {
             </div> */}
             <h4 style={{marginBottom: '1em'}}>MINT KEYS</h4>
             <span style={{width: 'calc(100% - 2.25ch)'}} className="input-wrapper">
-              <span className="input-label">🐭</span>
+              <div className="max-mice"> 
+                {!!signer ? <PixelButton onClick={() => UpdateMice(miceBalance)}>max</PixelButton> : null}
+              </div>
+                {!!signer ? <span className="mice-balance">{miceBalance}</span> : null}
+              <span className={'input-label' + (signer ? " mice" : '')}>🐭</span>
               <input value={mice} placeholder='0 ' className="mice-input" onChange={e => handleMiceInput(e)}  />
               {mice === MAX_MICE_PER_TX ? <span className="input-message">(max tx limit)</span> : null}
             </span>
             <div className="arrow-box"><span>👇</span></div>
             <span style={{width: 'calc(100% - 2.25ch)'}} className="input-wrapper" >
-              <span className="input-label" >🔑</span>
-              <input type="number" placeholder='0' className="mice-input" value={mice*24} disabled={true} />
+              {!!signer ? <span className="mice-balance">{keyBalance}</span> : null}
+              <span className={"input-label" + (signer ? " mice" : '')} >🔑</span>
+              <input type="number" placeholder='0' className="mice-input" value={mice*50} disabled={true} />
             </span>
               <br/>
-            <b style={{fontSize:"0.5em"}}> 1 mouse = 24 keys</b>
+            <b style={{fontSize:"0.5em"}}> 1 mouse = 50 keys</b>
             <br/>
             {
             !signer ? 
               <PixelButton onClick={() => setShouldLogin(true)}>Connect Wallet</PixelButton> : 
+              approvedFor ? 
               <PixelButton disabled={mice === 0} onClick={() => {
                 // web3 signin
-                purchaseWithMice(mice);
+                purchaseWithMice(mice).catch(err => NotificationManager.error(err.data.message, null, 5000));
               }}>MINT <span style={{
                 fontSize: '2em',
                 marginTop: '-0.4em',
                 marginLeft: '0.5em'
-              }}>🗝</span><span style={{fontSize:"0.75em"}}>'s</span></PixelButton>
+              }}>🗝</span><span style={{fontSize:"0.75em"}}>'s</span></PixelButton> :
+              <PixelButton onClick={() => {
+                // web3 signin
+                approveAllMice().catch(err => NotificationManager.error(err.data.message, null, 5000));
+              }}>APPROVE</PixelButton>
+              
             }
               
             </PixelBox>
           </div>
         </div>
       </header>
+      <NotificationContainer />
     </div>
   );
 
@@ -112,10 +129,16 @@ function App() {
     // trim leading zeros
     const mice = Number(input.toString().replace(/^0+/, ''));
     if(isNaN(Math.floor(Number(e.target.value)))) return;
-    if(mice > MAX_MICE_PER_TX) {
+    UpdateMice(mice);
+  }
+
+  function UpdateMice(mice: number) {
+    console.log(mice)
+    if (mice > MAX_MICE_PER_TX) {
       setMice(MAX_MICE_PER_TX);
-    } else
-    setMice(Number(mice));
+    }
+    else
+      setMice(Number(mice));
   }
 }
 
