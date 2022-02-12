@@ -1,0 +1,82 @@
+
+.PixelBox {
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
+    padding-left: 1.5ch;
+    width: min(90vw, 30ch);
+    min-width: 300px !important;
+}
+
+.PixelBox-background {
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top:0;
+    left:0;
+    border: 0.75em solid #7DD88D;
+}
+
+.PixelBox-shadow {
+    position: absolute;
+    bottom: -2.25ch;
+    right: -2.25ch;
+    width: calc(100% + 1.5ch);
+    height: calc(100% + 1.5ch);
+    z-index: 0;
+}
+
+.PixelBox-bottom-right-px {
+    position: absolute;
+    width: 0.75ch;
+    height: 0.75ch;
+    bottom: -2.25ch;
+    right: -2.25ch;
+    z-index: 2;
+}
+.PixelBox-top-left-px {
+    position: absolute;
+    width: 0.75ch;
+    height: 0.75ch;
+    top: 0ch;
+    left: 0ch;
+    z-index: 4;
+}
+.PixelBox-bottom-right-px-shadow {
+    position: absolute;
+    width: 0.75ch;
+    height: 0.75ch;
+    bottom: -1.5ch;
+    right: -1.5ch;
+    z-index: 3;
+}
+.PixelBox-bottom-right-px-inlay {
+    position: absolute;
+    width: 0.75ch;
+    height: 0.75ch;
+    bottom: -0.75ch;
+    right: -0.75ch;
+    z-index: 2;
+}
+.PixelBox-top-left-px-inlay {
+    position: absolute;
+    width: 0.8ch;
+    height: 0.8ch;
+    top: 0.70ch;
+    left: 0.7ch;
+    z-index: 3;
+}
+
+.PixelBox-content {
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+}
+
+.PixelBox-content > button {
+    width: calc(100% - 3em);
+    margin: auto;
+    margin-top: 0.5em;
+    padding: 1em 0em;
+  }

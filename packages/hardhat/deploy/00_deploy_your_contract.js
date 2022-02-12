@@ -18,6 +18,7 @@ const sleep = (ms) =>
     }, ms)
   );
 
+// eslint-disable-next-line no-use-before-define
 module.exports = async ({
   getNamedAccounts,
   deployments,
@@ -26,177 +27,103 @@ module.exports = async ({
   const { deploy } = deployments;
   const { deployer, alice, bob } = await getNamedAccounts();
   // const chainId = await getChainId();
-
   // get signers
   const [d, a, b] = await ethers.getSigners();
 
-  console.log(deployer, alice, bob);
-
-  // get gas price
-  const gasPrice = (await d.provider.getGasPrice()).mul(100).div(80);
-  const fakeCheez = await deploy("FakeCheez", {
+  const gasPrice = (await d.provider.getGasPrice()).mul(100).div(40);
+  // log gas
+  console.log(`gasPrice: ${gasPrice.toString()}`);
+  // current block
+  const block = await d.provider.getBlock("latest");
+  console.log(`block: ${block.number}`);
+  // deployer address
+  console.log(`deployer: ${deployer}`);
+  // get deployer nonce
+  const deployerNonce = await d.provider.getTransactionCount(deployer);
+  // deploy FondueTickets.sol
+  const FondueTickets = await deploy("FondueTickets", {
     from: deployer,
-    log: true,
-    args: [],
-    gasPrice: gasPrice.toNumber() * 2,
+    gasPrice,
+    nonce: deployerNonce,
+    args: [block.number],
   });
-  console.log(`Deployed fakeCheez contract @ ${fakeCheez.address}`);
-  await sleep(2000);
-  let fondue = await deploy("FonduePot", {
-    from: deployer,
-    gasPrice: gasPrice.toNumber() * 2,
-    args: [fakeCheez.address],
-  });
-  console.log(`Deployed fondue contract @ ${fondue.address}`);
-  fondue = await (
-    await ethers.getContractAt("FonduePot", fondue.address)
-  ).connect(d);
-  
-  await sleep(2000);
-  const cheez = await (
-    await ethers.getContractAt("FakeCheez", fakeCheez.address)
-  ).connect(d);
+  console.log(`Deployed FondueTickets contract @ ${FondueTickets.address}`);
 
-  // send fakeCheez to TestAddresses
-  // eslint-disable-next-line no-plusplus
-  for (let i = 0; i < TestAddresses.length; i++) {
-    // eslint-disable-next-line no-await-in-loop
-    await cheez.transfer(TestAddresses[i], 1000 * 10 ** 9, {
+  // new ethers contract
+  const FondueTicketsContract = new ethers.Contract(
+    FondueTickets.address,
+    FondueTickets.abi,
+    d
+  );
+
+  FondueTicketsContract.timeTillPresaleEnds().then((timeTillPresaleEnds) => {
+    // log timeTillPresaleEnds seconds to formatted date
+    console.log(
+      `timeTillPresaleEnds: ${new Date(
+        timeTillPresaleEnds.toNumber() * 1000
+      ).toLocaleString()}`
+    );
+  });
+};
+
+module.exports.tags = ["FondueTickets"];
+
+// Deprecated old FonduePot.sol (not used anymore)
+function DeployFondueJackpot() {
+  return async ({
+    getNamedAccounts,
+    deployments,
+    /* getChainId */
+  }) => {
+    const { deploy } = deployments;
+    const { deployer, alice, bob } = await getNamedAccounts();
+    // get signers
+    const [d, a, b] = await ethers.getSigners();
+
+    // get gas price
+    const gasPrice = (await d.provider.getGasPrice()).mul(100).div(80);
+    const fakeCheez = await deploy("FakeCheez", {
+      from: deployer,
+      log: true,
+      args: [],
       gasPrice: gasPrice.toNumber() * 2,
     });
-    console.log(`Sent 1000 fakeCheez to ${TestAddresses[i]}`);
-  }
-
-  const canDeposit = await fondue.canDeposit();
-
-  // if cant deposit initPot
-  if (!canDeposit) {
-    console.log("Initializing fondue pot...");
-    await fondue.connect(d).initPot({ gasPrice: gasPrice.toNumber() * 2 });
-    console.log("Initialized fondue pot");
-  }
-
-  console.log("ready...");
-
-  // Get cheez balance for alice and bob
-  // eslint-disable-next-line no-use-before-define
-  // await DepositAliceAndBob();
-
-  async function DepositAliceAndBob() {
-    const aliceCheezBalance = await cheez.balanceOf(alice);
-    const bobCheezBalance = await cheez.balanceOf(bob);
-    console.log(`Alice has ${aliceCheezBalance} cheez`);
-    console.log(`Bob has ${bobCheezBalance} cheez`);
-
-    // if canDeposit, have account alice deposit 0.01 CHEEZ
-    await cheez.connect(a).approve(address, aliceCheezBalance);
-    console.log("approved alice to deposit 0.01 cheez");
-    // deposit 0.1 CHEEZ
-    await fondue.connect(a).deposit(Math.floor(0.1 * 10 ** 9), {
-      gasLimit: 1000000,
+    console.log(`Deployed fakeCheez contract @ ${fakeCheez.address}`);
+    await sleep(2000);
+    let fondue = await deploy("FonduePot", {
+      from: deployer,
+      gasPrice: gasPrice.toNumber() * 2,
+      args: [fakeCheez.address],
     });
-    console.log("deposited");
+    console.log(`Deployed fondue contract @ ${fondue.address}`);
+    fondue = await (
+      await ethers.getContractAt("FonduePot", fondue.address)
+    ).connect(d);
 
-    // wait for deposit to be processed
-    await sleep(5000);
+    await sleep(2000);
+    const cheez = await (
+      await ethers.getContractAt("FakeCheez", fakeCheez.address)
+    ).connect(d);
 
-    let currentRound = await fondue.roundId();
-    console.log(`Current round id: ${currentRound}`);
+    // send fakeCheez to TestAddresses
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < TestAddresses.length; i++) {
+      // eslint-disable-next-line no-await-in-loop
+      await cheez.transfer(TestAddresses[i], 1000 * 10 ** 9, {
+        gasPrice: gasPrice.toNumber() * 2,
+      });
+      console.log(`Sent 1000 fakeCheez to ${TestAddresses[i]}`);
+    }
 
-    // get amount of entries
-    const amountOfEntries = await fondue.getEntries();
-    console.log(`Amount of entries: ${amountOfEntries}`);
+    const canDeposit = await fondue.canDeposit();
 
-    // get first entry
-    const firstEntry = await fondue.entries(0);
-    console.log(`First entry: ${firstEntry}`);
+    // if cant deposit initPot
+    if (!canDeposit) {
+      console.log("Initializing fondue pot...");
+      await fondue.connect(d).initPot({ gasPrice: gasPrice.toNumber() * 2 });
+      console.log("Initialized fondue pot");
+    }
 
-    // Get alice win chance
-    const aliceWinChance = await fondue.getWinChance(0).catch((err) => {
-      console.log(err);
-      return -1;
-    });
-    console.log(`Alice win chance: ${aliceWinChance} / 10000`);
-
-    // have bob deposit 0.01 cheez
-    await cheez.connect(b).approve(address, bobCheezBalance);
-    // use increased gas limit
-    await fondue.connect(b).deposit(Math.floor(0.1 * 10 ** 9), {
-      gasLimit: 1000000,
-    });
-    console.time("time till close");
-    await sleep(5000);
-
-    // get bobs entry
-    const bobEntry = await fondue.entries(1);
-    console.log(`Bob entry: ${bobEntry}`);
-
-    // get bobs win chance
-    const bobWinChance = await fondue.getWinChance(1);
-    console.log(`Bob win chance: ${bobWinChance} / 10000`);
-
-    // get alices new win chance
-    const aliceNewWinChance = await fondue.getWinChance(0);
-    console.log(`Alice new win chance: ${aliceNewWinChance} / 10000`);
-
-    // function that loops until blocksTillClose is 0
-    const loop = async () => {
-      // eslint-disable-next-line no-underscore-dangle
-      const secondsTillClose = await fondue.secondsTillClose().catch(() => 120);
-      console.log(`Blocks till close: ${secondsTillClose}`);
-      if (Number(secondsTillClose.toString()) > 0) {
-        await sleep(5000);
-        await loop();
-      } else {
-        console.timeEnd("time till close");
-      }
-    };
-
-    await loop();
-
-    // close pool
-    await fondue.connect(a).closePreviousRound({ gasLimit: 1000000 });
-
-    await sleep(5000);
-    // get current round
-    currentRound = await fondue.roundId();
-    console.log(`Current round id: ${currentRound}`);
-  }
-  // // attempt to get random number
-  // const randomNumber = await fondue.getRand(100);
-  // console.log(randomNumber.toString());
-
-  /*  await YourContract.setPurpose("Hello");
-  
-    To take ownership of yourContract using the ownable library uncomment next line and add the 
-    address you want to be the owner. 
-    // yourContract.transferOwnership(YOUR_ADDRESS_HERE);
-
-    //const yourContract = await ethers.getContractAt('YourContract', "0xaAC799eC2d00C013f1F11c37E654e59B0429DF6A") //<-- if you want to instantiate a version of a contract at a specific address!
-  */
-
-  /*
-  //If you want to send value to an address from the deployer
-  const deployerWallet = ethers.provider.getSigner()
-  await deployerWallet.sendTransaction({
-    to: "0x34aA3F359A9D614239015126635CE7732c18fDF3",
-    value: ethers.utils.parseEther("0.001")
-  })
-  */
-
-  /*
-  //If you want to send some ETH to a contract on deploy (make your constructor payable!)
-  const yourContract = await deploy("YourContract", [], {
-  value: ethers.utils.parseEther("0.05")
-  });
-  */
-
-  /*
-  //If you want to link a library into your contract:
-  // reference: https://github.com/austintgriffith/scaffold-eth/blob/using-libraries-example/packages/hardhat/scripts/deploy.js#L19
-  const yourContract = await deploy("YourContract", [], {}, {
-   LibraryName: **LibraryAddress**
-  });
-  */
-};
-module.exports.tags = ["FonduePot"];
+    console.log("ready...");
+  };
+}
