@@ -42,7 +42,7 @@ contract FondueTickets is ERC1155, IERC1155Receiver {
     uint public ticketsPerMouse = 24;
     uint public maxMicePerTx = 100;
 
-    event TicketPurchase(address purchaser, uint256 value, uint256 cost, bool isPresale);
+    event TicketPurchase(address purchaser, uint256 value, uint256 cost, bool isPresale); // cost is used post-presale (presale will be 0)
 
     modifier isInPresale {
         require(block.number > presaleStartBlock && block.number < presaleStartBlock + totalBlocksToMint && totalTicketsMintedAtPresale < maxTicketsFromPresale, "Presale is over");

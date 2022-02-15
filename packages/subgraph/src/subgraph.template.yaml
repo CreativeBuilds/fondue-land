@@ -3,28 +3,22 @@ schema:
   file: ./src/schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: FonduePot
+    name: FondueTickets
     network: mainnet
     source:
-      address: "{{mainnetHarmony_FonduePotAddress}}"
-      abi: FonduePot
-      startBlock: 22431839
+      address: "{{mainnetHarmony_FondueTicketsAddress}}"
+      abi: FondueTickets
+      startBlock: 22891839
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
-        - Player
-        - Round
-        - Entry
+        - Purchase
       abis:
-        - name: FonduePot
-          file: ./abis/mainnetHarmony_FonduePot.json
-        - name: FakeCheez
-          file: ./abis/mainnetHarmony_FakeCheez.json
+        - name: FondueTickets
+          file: ./abis/mainnetHarmony_FondueTickets.json
       eventHandlers:
-        - event: Deposit(uint256,address,uint256)
-          handler: handleDeposit
-        - event: Winner(uint256,address,uint256,uint256)
-          handler: handleWinner
+        - event: TicketPurchase(address,uint256,uint256,bool)
+          handler: handleTicketPurchase
       file: ./src/mapping.ts

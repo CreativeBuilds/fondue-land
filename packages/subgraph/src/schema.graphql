@@ -1,25 +1,7 @@
-type Round @entity {
+type Purchase @entity {
   id: ID!
+  createdAt: BigInt!
   amount: BigInt!
-  createdAt: BigInt!
-  entries: [Entry]!
-  winner: Entry
-}
-
-type Entry @entity {
-  id: ID!
-  amount: BigInt!
-  createdAt: BigInt!
-  round: Round!
-  sender: Player!
-  won: Boolean!
-}
-
-type Player @entity {
-  id: ID!
-  address: Bytes!
-  createdAt: BigInt!
-  entries: [Entry!]!
-  totalBet: BigInt!
-  totalWon: BigInt!
+  isPresale: Boolean!
+  purchaser: Bytes!
 }
