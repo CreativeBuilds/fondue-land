@@ -22,7 +22,7 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
  */ 
 
 contract FondueTickets is ERC1155, IERC1155Receiver {
-    ERC1155 public MouseContract = ERC1155(0x4e9c30CbD786549878049f808fb359741BF721ea);
+    ERC1155 public MouseContract;
     uint256 public constant TICKET = 0;
 
     uint public CHEEZ_PRICE = 5000; // out of 10000 (0.5 CHEEZ)
@@ -37,9 +37,9 @@ contract FondueTickets is ERC1155, IERC1155Receiver {
     IERC20 public CheezToken = IERC20(0xBbD83eF0c9D347C85e60F1b5D2c58796dBE1bA0d);
     address public treasury = address(0xD9d54CFFe5BbBb0633AEc3739488dfD0a00BeF5E);
  
-    uint public totalBlocksToMint = 50000;
-    uint public maxTicketsFromPresale = 24000;
-    uint public ticketsPerMouse = 24;
+    uint public totalBlocksToMint = 78500;
+    uint public maxTicketsFromPresale = 25000;
+    uint public ticketsPerMouse = 50;
     uint public maxMicePerTx = 100;
 
     event TicketPurchase(address purchaser, uint256 value, uint256 cost, bool isPresale); // cost is used post-presale (presale will be 0)
@@ -54,12 +54,13 @@ contract FondueTickets is ERC1155, IERC1155Receiver {
         _;
     }
     
-    constructor(uint256 _presaleStartBlock) ERC1155("https://fondue.land/api/token/0/${id}.json") {
+    constructor(uint256 _presaleStartBlock, ERC1155 _mouseContract) ERC1155("https://fondue.land/api/token/${id}.json") {
         if(_presaleStartBlock >= block.number) {
             presaleStartBlock = _presaleStartBlock;
         } else {
             presaleStartBlock = block.number;
         }
+        MouseContract = _mouseContract;
     }
 
     function timeTillPresaleEnds() public view isInPresale returns (uint)  {
@@ -96,17 +97,18 @@ contract FondueTickets is ERC1155, IERC1155Receiver {
      * @dev Mints tickets per each mouse sent
      */
     function onERC1155Received(address operator, address from, uint256 id, uint256 value, bytes calldata data) override public isInPresale returns (bytes4) {
-        require(operator == address(MouseContract), "unauthorized");
-        require(id == 1, "incorrect nft");
+        require(_msgSender() == address(MouseContract), "unauthorized");
+        require(id == 0, "incorrect nft");
         require(value > 0, "invalid value");
         require(value <= maxMicePerTx, "max per tx exceeded");
+        require(value + totalTicketsMintedAtPresale <= maxTicketsFromPresale, "max tickets exceeded");
 
         uint amountToMint = ticketsPerMouse * value;
         totalTicketsMintedAtPresale += amountToMint;
-        _mint(from, 0, amountToMint, "");
+        _mint(from, 0, amountToMint * 10 ** 9, "");
         emit TicketPurchase(from, value, 0, true);
         
-        return bytes4(keccak256("onERC1155Received(address,address,uint256[],uint256[],bytes)"));
+        return bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"));
     }
 
     function onERC1155BatchReceived(address operator, address from, uint256[] memory ids, uint256[] memory values, bytes calldata data) override pure public returns(bytes4) {
