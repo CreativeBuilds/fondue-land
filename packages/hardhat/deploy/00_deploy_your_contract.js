@@ -39,27 +39,27 @@ module.exports = async ({
   // deployer address
   console.log(`deployer: ${deployer}`);
   // get deployer nonce
-  let deployerNonce = await d.provider.getTransactionCount(deployer);
+  const deployerNonce = await d.provider.getTransactionCount(deployer);
 
   /* DEPLOY 👇 */
 
   // deploy Test1155 as nft contract
-  const Test1155 = await deploy("Test1155", {
-    from: deployer,
-    gasPrice: gasPrice.toNumber() * 2,
-    args: [TestAddresses[0]],
-    nonce: deployerNonce,
-  });
-  console.log(`Deployed Test1155 contract @ ${Test1155.address}`);
+  // const Test1155 = await deploy("Test1155", {
+  //   from: deployer,
+  //   gasPrice: gasPrice.toNumber() * 2,
+  //   args: [TestAddresses[0]],
+  //   nonce: deployerNonce,
+  // });
+  // console.log(`Deployed Test1155 contract @ ${Test1155.address}`);
 
-  deployerNonce = await d.provider.getTransactionCount(deployer);
+  // deployerNonce = await d.provider.getTransactionCount(deployer);
 
   // deploy FondueTickets.sol
   const FondueTickets = await deploy("FondueTickets", {
     from: deployer,
     gasPrice,
     nonce: deployerNonce,
-    args: [block.number, Test1155.address],
+    args: [block.number],
   });
   console.log(`Deployed FondueTickets contract @ ${FondueTickets.address}`);
 

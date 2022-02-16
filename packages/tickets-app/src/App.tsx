@@ -74,11 +74,11 @@ function App() {
             <h3>KEY PRESALE</h3>
             <p>{endDate}</p>
             <PixelBox className="App-presale-dialog">
-            {/* <div className="App-presale-total-minted">
-              <span>{minted} / 10000</span>
-              <div  style={{width:`${(minted / 10000) * 100}%`}} className="progress"/>
-            </div> */}
-            <h4 style={{marginBottom: '1em'}}>MINT KEYS</h4>
+            <div className="App-presale-total-minted">
+              <span>{minted} / 25000</span>
+              <div  style={{width:`${(minted / 25000) * 100}%`}} className="progress"/>
+            </div>
+            <h4 style={{marginBottom: '1em', marginTop: '2ch'}}>MINT KEYS</h4>
             <span style={{width: 'calc(100% - 2.25ch)'}} className="input-wrapper">
               <div className="max-mice"> 
                 {!!signer ? <PixelButton onClick={() => UpdateMice(miceBalance)}>max</PixelButton> : null}
@@ -111,7 +111,7 @@ function App() {
               }}>🗝</span><span style={{fontSize:"0.75em"}}>'s</span></PixelButton> :
               <PixelButton onClick={() => {
                 // web3 signin
-                approveAllMice().catch(err => NotificationManager.error(err.data.message, null, 5000));
+                approveAllMice().then().catch(err => NotificationManager.error(err.data.message, null, 5000));
               }}>APPROVE</PixelButton>
               
             }

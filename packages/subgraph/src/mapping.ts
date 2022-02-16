@@ -4,17 +4,15 @@ import {TicketPurchase} from "../generated/FondueTickets/FondueTickets";
 import {Purchase} from "../generated/schema";
 
 export function handleTicketPurchase(event: TicketPurchase): void {
-  try {
-    let amount = event.params.value;
-    let player = event.transaction.from;
-    let isPresale = event.params.isPresale;
-    let purchase = new Purchase(event.transaction.hash+"-"+player.toHex());
-    purchase.createdAt = new BigInt(Date.now());
-    purchase.amount = amount;
-    purchase.isPresale = isPresale;
-    purchase.purchaser = player;
-    purchase.save();
-  } catch (e) { null; }
+  let amount = event.params.value;
+  let player = event.transaction.from;
+  let isPresale = event.params.isPresale;
+  let purchase = new Purchase(event.transaction.hash.toString()+"-"+player.toHex());
+  purchase.createdAt = event.block.timestamp;
+  purchase.amount = amount;
+  purchase.isPresale = isPresale;
+  purchase.purchaser = player;
+  purchase.save();
 }
 
 // // function handleDeposit

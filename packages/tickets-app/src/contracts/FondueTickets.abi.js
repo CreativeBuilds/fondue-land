@@ -39,6 +39,25 @@ module.exports = [
     "anonymous": false,
     "inputs": [
       {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
         "indexed": false,
         "internalType": "address",
         "name": "purchaser",
@@ -174,7 +193,7 @@ module.exports = [
   },
   {
     "inputs": [],
-    "name": "CheezToken",
+    "name": "DAI",
     "outputs": [
       {
         "internalType": "contract IERC20",
@@ -434,6 +453,19 @@ module.exports = [
   },
   {
     "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "presaleStartBlock",
     "outputs": [
       {
@@ -453,7 +485,7 @@ module.exports = [
         "type": "uint256"
       }
     ],
-    "name": "purchaseWithCheese",
+    "name": "purchaseWithDai",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -467,6 +499,13 @@ module.exports = [
       }
     ],
     "name": "purchaseWithMice",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -672,6 +711,19 @@ module.exports = [
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "treasury",
     "outputs": [
@@ -682,6 +734,19 @@ module.exports = [
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_treasury",
+        "type": "address"
+      }
+    ],
+    "name": "updateTreasuryAddress",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

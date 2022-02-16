@@ -73,7 +73,7 @@ export function useFondueTickets(signer: Signer) {
     return async () => {
       Promise.all([
         presaleContract?.CHEEZ_PRICE().then((num: ethers.BigNumber) => num.toNumber() / 10 ** 9),
-        presaleContract?.totalTicketsMinted().then((num: ethers.BigNumber) => num.toNumber()),
+        presaleContract?.totalTicketsMintedAtPresale().then((num: ethers.BigNumber) => num.toNumber()),
         presaleContract?.timeTillPresaleEnds().then((num: ethers.BigNumber) => num.toNumber()).catch(() => BigNumber.from(0)),
         signer?.getAddress()?.then(address => presaleContract?.balanceOf(address, 0).then((num: ethers.BigNumber) => num.toNumber() / 10 ** 9)).catch(() => 0),
       ]).then(([a, b, c, d]) => {
@@ -95,15 +95,14 @@ export function useFondueTickets(signer: Signer) {
 
   async function purchaseWithMice(amountOfMice: number) {
     console.log("trying to buy", amountOfMice, "mice");
-    return presaleContract?.purchaseWithMice(amountOfMice).then((tx: any) => {
-      console.log(tx);
-
-    })
+    return presaleContract?.purchaseWithMice(amountOfMice)
+    .then((tx: any) => tx.wait(1))
+    .then(() => Promise.all([UpdateContractInfo()(), UpdateMiceInfo()()]))
   }
   async function approveAllMice() {
     console.log('approval mice')
     return nftContract?.setApprovalForAll(presaleContract?.address, true)
-    .then(() => new Promise(resolve => setTimeout(resolve, 3000)))
-    .then(() => (UpdateMiceInfo())());
+    .then((tx: any) => tx.wait(1))
+    .then(() => (UpdateMiceInfo()()));
   }
 }
