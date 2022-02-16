@@ -10,6 +10,7 @@ import { Signer } from 'ethers';
 import { useFondueTickets } from './helpers/useFondueTickets';
 import {NotificationContainer, NotificationManager} from 'react-notifications';
 import 'react-notifications/lib/notifications.css';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
   const [mice, setMice] = React.useState(0);
