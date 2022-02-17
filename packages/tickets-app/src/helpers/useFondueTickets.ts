@@ -19,7 +19,6 @@ export function useFondueTickets(signer: Signer) {
   const [keyBalance, setKeyBalance] = useState(0);
   const [approvedFor, setApprovedFor] = useState(false);
 
-
   useEffect(() => {
     (UpdateContractInfo())();
   }, [presaleContract]);
@@ -61,8 +60,6 @@ export function useFondueTickets(signer: Signer) {
         signer?.getAddress()?.then(address => nftContract?.isApprovedForAll(address, presaleContract?.address)),
         signer?.getAddress()?.then(address => nftContract?.balanceOf(address, 0)),
       ]).then(([a, b]) => {
-        // log ab
-        console.log(a, b, "a b");
         setApprovedFor(a);
         setMiceBalance((b as BigNumber).toNumber());
       });
@@ -94,13 +91,12 @@ export function useFondueTickets(signer: Signer) {
   }
 
   async function purchaseWithMice(amountOfMice: number) {
-    console.log("trying to buy", amountOfMice, "mice");
     return presaleContract?.purchaseWithMice(amountOfMice)
     .then((tx: any) => tx.wait(1))
     .then(() => Promise.all([UpdateContractInfo()(), UpdateMiceInfo()()]))
   }
+  
   async function approveAllMice() {
-    console.log('approval mice')
     return nftContract?.setApprovalForAll(presaleContract?.address, true)
     .then((tx: any) => tx.wait(1))
     .then(() => (UpdateMiceInfo()()));
