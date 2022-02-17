@@ -8,7 +8,7 @@ dataSources:
     source:
       address: "{{mainnetHarmony_FondueTicketsAddress}}"
       abi: FondueTickets
-      startBlock: 22891839
+      startBlock: 23060617
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
