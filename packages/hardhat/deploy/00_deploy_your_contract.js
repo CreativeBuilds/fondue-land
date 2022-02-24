@@ -22,65 +22,90 @@ const sleep = (ms) =>
 module.exports = async ({
   getNamedAccounts,
   deployments,
-  /* getChainId */
 }) => {
   const { deploy } = deployments;
   const { deployer, alice, bob } = await getNamedAccounts();
-  // const chainId = await getChainId();
   // get signers
   const [d, a, b] = await ethers.getSigners();
 
-  const gasPrice = (await d.provider.getGasPrice()).mul(100).div(40);
-  // log gas
-  console.log(`gasPrice: ${gasPrice.toString()}`);
-  // current block
-  const block = await d.provider.getBlock("latest");
-  console.log(`block: ${block.number}`);
-  // deployer address
-  console.log(`deployer: ${deployer}`);
-  // get deployer nonce
+  const gasPrice = (await d.provider.getGasPrice());
+
   const deployerNonce = await d.provider.getTransactionCount(deployer);
 
-  /* DEPLOY 👇 */
-
-  // deploy Test1155 as nft contract
-  // const Test1155 = await deploy("Test1155", {
-  //   from: deployer,
-  //   gasPrice: gasPrice.toNumber() * 2,
-  //   args: [TestAddresses[0]],
-  //   nonce: deployerNonce,
-  // });
-  // console.log(`Deployed Test1155 contract @ ${Test1155.address}`);
-
-  // deployerNonce = await d.provider.getTransactionCount(deployer);
-
-  // deploy FondueTickets.sol
-  const FondueTickets = await deploy("FondueTickets", {
+  const TheFondueMicePot = await deploy("TheFondueMicePot", {
     from: deployer,
     gasPrice,
     nonce: deployerNonce,
-    args: [block.number],
+    args: [
+      "0xbbd83ef0c9d347c85e60f1b5d2c58796dbe1ba0d"
+    ]
   });
-  console.log(`Deployed FondueTickets contract @ ${FondueTickets.address}`);
 
-  // new ethers contract
-  const FondueTicketsContract = new ethers.Contract(
-    FondueTickets.address,
-    FondueTickets.abi,
-    d
-  );
+  console.log(`Deployed TheFondueMicePot contract @ ${TheFondueMicePot.address}`);
 
-  FondueTicketsContract.timeTillPresaleEnds().then((timeTillPresaleEnds) => {
-    // log timeTillPresaleEnds seconds to formatted date
-    console.log(
-      `timeTillPresaleEnds: ${new Date(
-        timeTillPresaleEnds.toNumber() * 1000
-      ).toLocaleString()}`
+
+}
+
+module.exports.tags = ["TheFondueMicePot"];
+
+function DeployFondueTickets() {
+  return async ({
+    getNamedAccounts, deployments,
+    /* getChainId */
+  }) => {
+    const { deploy } = deployments;
+    const { deployer, alice, bob } = await getNamedAccounts();
+    // const chainId = await getChainId();
+    // get signers
+    const [d, a, b] = await ethers.getSigners();
+
+    const gasPrice = (await d.provider.getGasPrice()).mul(100).div(40);
+    // log gas
+    console.log(`gasPrice: ${gasPrice.toString()}`);
+    // current block
+    const block = await d.provider.getBlock("latest");
+    console.log(`block: ${block.number}`);
+    // deployer address
+    console.log(`deployer: ${deployer}`);
+    // get deployer nonce
+    const deployerNonce = await d.provider.getTransactionCount(deployer);
+
+    /* DEPLOY 👇 */
+    // deploy Test1155 as nft contract
+    // const Test1155 = await deploy("Test1155", {
+    //   from: deployer,
+    //   gasPrice: gasPrice.toNumber() * 2,
+    //   args: [TestAddresses[0]],
+    //   nonce: deployerNonce,
+    // });
+    // console.log(`Deployed Test1155 contract @ ${Test1155.address}`);
+    // deployerNonce = await d.provider.getTransactionCount(deployer);
+    // deploy FondueTickets.sol
+    const FondueTickets = await deploy("FondueTickets", {
+      from: deployer,
+      gasPrice,
+      nonce: deployerNonce,
+      args: [block.number],
+    });
+    console.log(`Deployed FondueTickets contract @ ${FondueTickets.address}`);
+
+    // new ethers contract
+    const FondueTicketsContract = new ethers.Contract(
+      FondueTickets.address,
+      FondueTickets.abi,
+      d
     );
-  });
-};
 
-module.exports.tags = ["FondueTickets"];
+    FondueTicketsContract.timeTillPresaleEnds().then((timeTillPresaleEnds) => {
+      // log timeTillPresaleEnds seconds to formatted date
+      console.log(
+        `timeTillPresaleEnds: ${new Date(
+          timeTillPresaleEnds.toNumber() * 1000
+        ).toLocaleString()}`
+      );
+    });
+  };
+}
 
 // Deprecated old FonduePot.sol (not used anymore)
 function DeployFondueJackpot() {

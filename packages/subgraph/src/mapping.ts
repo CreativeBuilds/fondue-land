@@ -1,7 +1,8 @@
 import { BigInt } from "@graphprotocol/graph-ts";
-import {Deposit, Winner} from "../generated/FonduePot/FonduePot";
+// import {Deposit, Winner} from "../generated/FonduePot/FonduePot";
 import {TicketPurchase} from "../generated/FondueTickets/FondueTickets";
-import {Purchase} from "../generated/schema";
+import {KeysDeposited} from "../generated/TheFondueMicePot/TheFondueMicePot"; 
+import {Purchase, Deposit} from "../generated/schema";
 
 export function handleTicketPurchase(event: TicketPurchase): void {
   let amount = event.params.value;
@@ -13,6 +14,16 @@ export function handleTicketPurchase(event: TicketPurchase): void {
   purchase.isPresale = isPresale;
   purchase.purchaser = player;
   purchase.save();
+}
+
+export function handleKeysDeposited(event: KeysDeposited): void {
+  let amount = event.params.value;
+  let player = event.transaction.from;
+  let deposit = new Deposit(event.transaction.hash.toString()+"-"+player.toHex());
+  deposit.createdAt = event.block.timestamp;
+  deposit.amount = amount;
+  deposit.depositor = player;
+  deposit.save();
 }
 
 // // function handleDeposit

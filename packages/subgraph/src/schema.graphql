@@ -5,3 +5,10 @@ type Purchase @entity {
   isPresale: Boolean!
   purchaser: Bytes!
 }
+
+type Deposit @entity {
+  id: ID!
+  createdAt: BigInt!
+  amount: BigInt!
+  depositer: Bytes!
+}
