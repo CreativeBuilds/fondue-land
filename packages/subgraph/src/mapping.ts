@@ -7,7 +7,7 @@ export function handleTicketPurchase(event: TicketPurchase): void {
   let amount = event.params.value;
   let player = event.transaction.from;
   let isPresale = event.params.isPresale;
-  let purchase = new Purchase(event.transaction.hash.toString()+"-"+player.toHex());
+  let purchase = new Purchase(event.transaction.hash.toHexString()+"-"+event.transactionLogIndex.toHex());
   purchase.createdAt = event.block.timestamp;
   purchase.amount = amount;
   purchase.isPresale = isPresale;

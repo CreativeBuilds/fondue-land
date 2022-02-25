@@ -78,43 +78,8 @@ function App() {
               <span>{minted} / 25000</span>
               <div  style={{width:`${(minted / 25000) * 100}%`}} className="progress"/>
             </div>
-            <h4 style={{marginBottom: '1em', marginTop: '2ch'}}>MINT KEYS</h4>
-            <span style={{width: 'calc(100% - 2.25ch)'}} className="input-wrapper">
-              <div className="max-mice"> 
-                {!!signer ? <PixelButton onClick={() => UpdateMice(miceBalance)}>max</PixelButton> : null}
-              </div>
-                {!!signer ? <span className="mice-balance">{miceBalance}</span> : null}
-              <span className={'input-label' + (signer ? " mice" : '')}>🐭</span>
-              <input value={mice} placeholder='0 ' className="mice-input" onChange={e => handleMiceInput(e)}  />
-              {mice === MAX_MICE_PER_TX ? <span className="input-message">(max tx limit)</span> : null}
-            </span>
-            <div className="arrow-box"><span>👇</span></div>
-            <span style={{width: 'calc(100% - 2.25ch)'}} className="input-wrapper" >
-              {!!signer ? <span className="mice-balance">{keyBalance}</span> : null}
-              <span className={"input-label" + (signer ? " mice" : '')} >🔑</span>
-              <input type="number" placeholder='0' className="mice-input" value={mice*50} disabled={true} />
-            </span>
-              <br/>
-            <b style={{fontSize:"0.5em"}}> 1 mouse = 50 keys</b>
-            <br/>
-            {
-            !signer ? 
-              <PixelButton onClick={() => setShouldLogin(true)}>Connect Wallet</PixelButton> : 
-              approvedFor ? 
-              <PixelButton disabled={mice === 0} onClick={() => {
-                // web3 signin
-                purchaseWithMice(mice).catch(err => NotificationManager.error(err.data.message, null, 5000));
-              }}>MINT <span style={{
-                fontSize: '2em',
-                marginTop: '-0.4em',
-                marginLeft: '0.5em'
-              }}>🗝</span><span style={{fontSize:"0.75em"}}>'s</span></PixelButton> :
-              <PixelButton onClick={() => {
-                // web3 signin
-                approveAllMice().then().catch(err => NotificationManager.error(err.data.message, null, 5000));
-              }}>APPROVE</PixelButton>
-              
-            }
+            <h4 style={{marginBottom: '1em', marginTop: '2.2ch'}}>PRESALE FINISHED</h4>
+            <div style={{fontSize:"0.8ch", lineHeight: '1.2ch'}}>Thank you for participating in the fondue.land presale! A total of <span  style={{color: 'white', fontSize: '0.9ch', fontWeight: 'bolder'}}>260</span> mice were raised for a collective <span  style={{color: 'white', fontSize: '0.9ch', fontWeight: 'bolder'}}>13,000</span> tickets! Full launch is targeted for start of <span style={{color: 'white', fontSize: '0.9ch', fontWeight: 'bolder'}}>March</span>.</div>
               
             </PixelBox>
           </div>
