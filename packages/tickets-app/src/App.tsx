@@ -69,14 +69,18 @@ function AppHeaderBar({
   signer,
   setShouldLogin,
   accounts,
+  title
 }: {
   signer: Signer;
   setShouldLogin: (shouldLogin: boolean) => void;
   accounts: string[];
+  title?: string;
 }) {
+  if(!title) title = "fondue.land";
   const ADDR = accounts[0]
     ? accounts[0].slice(0, 5) + "..." + accounts[0].slice(-3)
     : "";
+    console.log(accounts, ADDR, !signer);
   return (
     <div className="App-header-bar">
       <img
@@ -85,8 +89,9 @@ function AppHeaderBar({
         className="App-logo"
         alt="logo"
       />
-      <div>KEY PRESALE</div>
-      {!signer ? (
+      <div>{title}</div>
+      <a href="https://docs.fondue.land/" target="_blank" style={{marginLeft: 'auto', fontSize: '0.8ch', marginRight: '1ch'}}>DOCS</a>
+      {!signer || accounts.length == 0 ? (
         <PixelButton
           style={{
             marginTop: "-0.5em",
@@ -102,7 +107,6 @@ function AppHeaderBar({
         <>
           <div
             className="App-header-bar-account"
-            style={{ marginLeft: "auto" }}
           >
             {ADDR}
           </div>
@@ -358,11 +362,15 @@ function Dashboard({
       <div className="App-dashboard">
         <PixelBox className="App-dashboard-earnings">
           <h3>STATS</h3>
+          {KeysInput(mice)}
           <span
             style={{ width: "100%", marginTop: "2ch" }}
             className="input-wrapper"
           >
-            <span className={"input-title"}>YOUR KEYS</span>
+            <span className={"input-title"}>
+              ENTRY EARNINGS 
+              <HoverInfo text={"players receive 50% of mint cost based on keys entered"} />
+            </span>
             <input
               type="number"
               placeholder="0"
@@ -370,40 +378,19 @@ function Dashboard({
               value={mice * 50}
               disabled={true}
             />
+            <span style={{position: 'absolute', right: '1ch', top: '1ch', zIndex: 1, color: "#0C0b0b"}}>DAI</span>
           </span>
-          <span
-            style={{ width: "100%", marginTop: "2ch" }}
-            className="input-wrapper"
-          >
-            <span className={"input-title"}>TOTAL KEYS</span>
-            <input
-              type="number"
-              placeholder="0"
-              className="mice-input"
-              value={mice * 50}
-              disabled={true}
-            />
-          </span>
-          <span
-            style={{ width: "100%", marginTop: "2ch" }}
-            className="input-wrapper"
-          >
-            <span className={"input-title"}>TOTAL EARNINGS</span>
-            <input
-              type="number"
-              placeholder="0"
-              className="mice-input"
-              value={mice * 50}
-              disabled={true}
-            />
-          </span>
-          <p style={{ marginTop: "1ch" }}>
+          <div style={{flex: 1, "width": "100%"}}></div>
+          <p style={{ marginTop: "auto", display: "flex-block" }}>
             Round time totals 45 days, 20 hours, and 30 minutes.
           </p>
+          <PixelButton onClick={() => null} disabled>
+          CLAIM
+          </PixelButton>
         </PixelBox>
         <PixelBox className="App-dashboard-buy-keys">
           <h3>BUY KEYS</h3>
-          <p>Price of keys increases by $0.001/key minted.</p>
+          <p>Price of keys increases by $0.00033/key minted.</p>
           <span
             style={{ width: "calc(100% - 2.25ch)" }}
             className="input-wrapper"
@@ -431,7 +418,7 @@ function Dashboard({
         <PixelBox className="App-dashboard-jackpot">
           <h3>JACKPOT</h3>
           <h5><span>0x498<span>...</span>348</span> is unlocking</h5>
-          <h4>103 MICE!</h4>
+          <h4>260 MICE!</h4>
           <h5>in 3 hours, 43 minutes, and 20 seconds</h5>
         </PixelBox>
         <PixelBox className="App-dashboard-enter-jackpot">
@@ -486,3 +473,28 @@ function Dashboard({
     </header>
   );
 }
+function KeysInput(mice: number) {
+  return <span
+    style={{ width: "100%", marginTop: "2ch" }}
+    className="input-wrapper"
+  >
+    <span className={"input-title"}>YOUR KEYS</span>
+    <span className={"input-title"} style={{ left: 'unset', right: 0 }}>TOTAL KEYS</span>
+    <input
+      type="number"
+      placeholder="0"
+      className="mice-input"
+      value={mice * 50}
+      disabled={true} />
+    <span className={"input-overlay-middle"} >/</span>
+    <span className={"input-overlay"} >0</span>
+  </span>;
+}
+
+function HoverInfo({text}: {text: string}) {
+  return <div className="hover-info">
+    <span className={"i-hover"}>i</span>
+    <span className={"info-text"}>{text}</span>
+  </div>;
+}
+

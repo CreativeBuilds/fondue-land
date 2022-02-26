@@ -37,7 +37,7 @@ header.App-header {
 .App-header p,
 .App-header h3 {
   color: #0c0b0b;
-  padding-left: 0.75em;
+  padding-left: 0em;
 }
 .App-header h3,
 .App-header h4 {
@@ -66,6 +66,14 @@ header.App-header {
   box-sizing: border-box;
   max-width: 100vw;
   overflow: hidden;
+}
+
+.App-header-bar a {
+  color: white;
+  text-decoration: none;
+}
+.App-header-bar a:hover {
+  text-decoration: underline;
 }
 
 .App-header-bar button {
@@ -180,6 +188,59 @@ button {
   z-index: 2;
   font-size: 0.6ch;
   color: #0c0b0b;
+}
+.input-overlay-middle {
+  position: absolute;
+  top: 1ch;
+  left: 0.5ch;
+  z-index: 1;
+  width: calc(100% - 1em);
+  height: calc(100% - 1em);
+  color: #0c0b0b;
+}
+.input-overlay {
+  position: absolute;
+  right: 0;
+  top: 1ch;
+  z-index: 1;
+  margin-right: 0.5ch;
+  color: #0C0B0B;
+}
+.hover-info {
+  position: relative;
+  display: inline-block;
+}
+.i-hover {
+  background: #0C0B0B;
+  color: white;
+  border-radius: 50%;
+  font-size: 0.6ch;
+  padding: 0.4ch;
+  left: unset;
+  margin-left: 0.5ch;
+  margin-bottom: 1ch;
+  position: absolute;
+  top: -1.5ch;
+}
+.info-text {
+  display: none;
+  margin-top: 0.5ch;
+}
+.hover-info:hover .info-text {
+  display: inline-block;
+  position: absolute;
+  left: 2.5ch;
+  top: -4.5ch;
+  background:rgb(91, 182, 107);
+  width: 12ch;
+  border: 0.5ch #7DD88D solid;
+  box-shadow: 0.5ch 0.5ch 0 rgb(33, 134, 91);
+  font-size: 0.6ch;
+  padding: 0.5ch;
+  z-index:10;
+}
+.i-hover:hover {
+  cursor: pointer;
 }
 .input-label.mice {
   top: 0em;
@@ -365,6 +426,14 @@ button {
 .App-dashboard-earnings {
   grid-column: 1/2;
   grid-row: 1/4;
+}
+.App-dashboard-earnings .PixelBox-content {
+  display: flex;
+  flex-direction: column;
+}
+.App-dashboard-earnings .PixelBox-content .PixelButton {
+  width: inherit;
+  margin-bottom:1ch;
 }
 .App-dashboard-jackpot {
   grid-column: 2/4;

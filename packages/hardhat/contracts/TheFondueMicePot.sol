@@ -17,11 +17,12 @@ contract TheFondueMicePot is ERC20Rewards, IERC1155Receiver {
 
     event KeysDeposited (address from, uint256 _amount, uint256 _endDate);
     
-    constructor(address rewardsToken_) ERC20Rewards(
+    constructor(address rewardsToken_, IERC1155 _fondueKeys) ERC20Rewards(
         "fondue",
         "fondue",
         9
     ) {
+        FondueKeys = _fondueKeys;
         setRewardsToken(rewardsToken_);
     }
 

@@ -10,6 +10,129 @@ const TestAddresses = [
   "0x3CD98CB8962EbDe57515F8843dd0D2AeE0A6C37B",
 ];
 
+const OGMinters = [
+  {
+      "minter": "0xef21e7c9fcbf76e1741e836f6c2879504549b3dc",
+      "minted": 3
+  },
+  {
+      "minter": "0x572c9cfb29746615f67dedd38f7daabd8addcbd1",
+      "minted": 1
+  },
+  {
+      "minter": "0x334dc1d8f223ba692449f1a4ea07d1d36c335125",
+      "minted": 1
+  },
+  {
+      "minter": "0xd40fc0beb479479b8beccac3196996e1e3cbb610",
+      "minted": 2
+  },
+  {
+      "minter": "0xf9911e360c6e5e3e1699a3a828c493136f25c63c",
+      "minted": 1
+  },
+  {
+      "minter": "0x692b01518dc87b8eaa3906147423e9941492726c",
+      "minted": 2
+  },
+  {
+      "minter": "0x8495ccacba569f3dc40680389cd3ac744fa01640",
+      "minted": 1
+  },
+  {
+      "minter": "0xfd4ea5ec9ca35e1c7269f473ba14d6e73079d8d5",
+      "minted": 12
+  },
+  {
+      "minter": "0xb72c0bd8e68de7de2bf99abe238ad7d18f9daaf7",
+      "minted": 7
+  },
+  {
+      "minter": "0x5ff1a956284be4e6342aafa92f39fad65ac1acf8",
+      "minted": 14
+  },
+  {
+      "minter": "0x6177c71d568960d87e958c38000350ed3276796b",
+      "minted": 2
+  },
+  {
+      "minter": "0x6dac62e20f3c62819e98148bd346e44506778024",
+      "minted": 2
+  },
+  {
+      "minter": "0x780793b97d3dbb3f573e1ad123a082c0d53e32f4",
+      "minted": 3
+  },
+  {
+      "minter": "0x21258055dfd7a287dcc224e3586210f1864c1996",
+      "minted": 3
+  },
+  {
+      "minter": "0x76490bd39ec9a0fe14015608d594725bb9dd5829",
+      "minted": 3
+  },
+  {
+      "minter": "0xb81a7cc5af4acb0294ee124b5ad01d8d46e80cf7",
+      "minted": 3
+  },
+  {
+      "minter": "0x4753230b11e9fb0ae585925e020ea3fe35331e7e",
+      "minted": 1
+  },
+  {
+      "minter": "0x48151d601741d3f36ee73c19c0bacf121170c0d2",
+      "minted": 1
+  },
+  {
+      "minter": "0x987deb5a31c239deddb1a40165ad39c1c449962e",
+      "minted": 2
+  },
+  {
+      "minter": "0x6fa0ce4dc4e677c65aac9e4cb56d02b57820777d",
+      "minted": 1
+  },
+  {
+      "minter": "0x7e7a3a719c0a2a9a5b9c7cee320bdf0088f9924e",
+      "minted": 1
+  },
+  {
+      "minter": "0x62b4728c3cef6541ecf4bf41e61a7c1378cae631",
+      "minted": 50
+  },
+  {
+      "minter": "0x643f8c22c2fadc3948146456c11fbb135da62738",
+      "minted": 1
+  },
+  {
+      "minter": "0x8eb071957c416384bb9418cf5956279657bb3a14",
+      "minted": 1
+  },
+  {
+      "minter": "0xb1018c09c81a2e4d66dee7720e24399bd5ce124a",
+      "minted": 10
+  },
+  {
+      "minter": "0x26da08a06817789172b860ae77799df0a77461aa",
+      "minted": 2
+  },
+  {
+      "minter": "0xdd66525f4ab14f2044e39d84bcf51ef2463b86ae",
+      "minted": 1
+  },
+  {
+      "minter": "0x3f2571131e593e1e324ad4d57ad17f1b6bbd0014",
+      "minted": 1
+  },
+  {
+      "minter": "0x1611cad092c8744ce2361a64273ec1cc049e825c",
+      "minted": 100
+  },
+  {
+      "minter": "0x019a3b63aeb80526c09939d5d33902970b92fd9c",
+      "minted": 29
+  }
+]
+
 const sleep = (ms) =>
   new Promise((r) =>
     setTimeout(() => {
@@ -43,10 +166,21 @@ module.exports = async ({
 
   console.log(`Deployed TheFondueMicePot contract @ ${TheFondueMicePot.address}`);
 
+  const FondueTicketsV2 = await deploy("FondueTicketsV2", {
+    from: deployer,
+    gasPrice,
+    nonce: deployerNonce + 1,
+    args: [
+      OGMinters,
+      TheFondueMicePot.address,
+    ]
+  })
+
+  console.log(`Deployed FondueTicketsV2 contract @ ${FondueTicketsV2.address}`);
 
 }
 
-module.exports.tags = ["TheFondueMicePot"];
+module.exports.tags = ["TheFondueMicePot", "FondueTicketsV2"];
 
 function DeployFondueTickets() {
   return async ({
