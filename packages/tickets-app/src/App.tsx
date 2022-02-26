@@ -162,6 +162,7 @@ function Presale({
         signer={signer}
         setShouldLogin={setShouldLogin}
         accounts={accounts}
+        title="KEY PRESALE"
       />
       <div className="App-presale">
         <div className="App-fondue-info">
@@ -225,7 +226,7 @@ function Presale({
               />
             </div>
             <h4 style={{ marginBottom: "1em", marginTop: "2ch" }}>MINT KEYS</h4>
-            <span style={{ width: "100%" }} className="input-wrapper">
+            <span style={{ width: "calc(100% - 2.25ch)" }} className="input-wrapper">
               <div className="max-mice">
                 {!!signer ? (
                   <PixelButton onClick={() => UpdateMice(miceBalance)}>
@@ -358,6 +359,7 @@ function Dashboard({
         signer={signer}
         setShouldLogin={setShouldLogin}
         accounts={accounts}
+        title="DASHBOARD"
       />
       <div className="App-dashboard">
         <PixelBox className="App-dashboard-earnings">
@@ -434,8 +436,8 @@ function Dashboard({
             <div className="max-mice">
               {!!signer ? (
                 <PixelButton
-                  style={{ marginRight: "2.5ch" }}
-                  onClick={() => UpdateMice(miceBalance)}
+                  style={{ marginRight: `calc(${0.5 + keyBalance.toString().length}ch)` }}
+                  onClick={() => console.warn("TODO: Enter the game button")}
                 >
                   max
                 </PixelButton>
