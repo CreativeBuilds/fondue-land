@@ -2,11 +2,12 @@ type Purchase @entity {
   id: ID!
   createdAt: BigInt!
   amount: BigInt!
+  cost: BigInt!
   isPresale: Boolean!
   purchaser: Bytes!
 }
 
-type Deposit @entity {
+type TakeThePot @entity {
   id: ID!
   createdAt: BigInt!
   amount: BigInt!

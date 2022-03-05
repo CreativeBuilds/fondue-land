@@ -1,3 +1,5 @@
+/* eslint-disable no-use-before-define */
+/* eslint-disable prettier/prettier */
 /* eslint-disable no-unused-vars */
 // deploy/00_deploy_your_contract.js
 
@@ -141,6 +143,9 @@ const sleep = (ms) =>
     }, ms)
   );
 
+const DAI_ADDRESS = "0xEf977d2f931C1978Db5F6747666fa1eACB0d0339";
+
+
 // eslint-disable-next-line no-use-before-define
 module.exports = async ({
   getNamedAccounts,
@@ -153,34 +158,52 @@ module.exports = async ({
 
   const gasPrice = (await d.provider.getGasPrice());
 
-  const deployerNonce = await d.provider.getTransactionCount(deployer);
+  let deployerNonce = await d.provider.getTransactionCount(deployer);
 
-  const TheFondueMicePot = await deploy("TheFondueMicePot", {
-    from: deployer,
-    gasPrice,
-    nonce: deployerNonce,
-    args: [
-      "0xbbd83ef0c9d347c85e60f1b5d2c58796dbe1ba0d"
-    ]
-  });
+  const FondueTicketsV2 = await DeployScript("DummyTickets", [[{
+    "minter": a.address,
+    "minted": 100
+  }, {
+    "minter": "0xB72C0BD8E68DE7DE2BF99ABE238AD7D18F9DAAF7",
+    "minted": 1000
+  }]], a);
 
-  console.log(`Deployed TheFondueMicePot contract @ ${TheFondueMicePot.address}`);
+  // console.log(`Deployed DummyTickets contract @ ${FondueTicketsV2.address}`);
 
-  const FondueTicketsV2 = await deploy("FondueTicketsV2", {
-    from: deployer,
-    gasPrice,
-    nonce: deployerNonce + 1,
-    args: [
-      OGMinters,
-      TheFondueMicePot.address,
-    ]
-  })
+  const TheFondueMicePot = await DeployScript("TheFondueMicePot", [
+    FondueTicketsV2.address,
+  ], a);
 
-  console.log(`Deployed FondueTicketsV2 contract @ ${FondueTicketsV2.address}`);
+  async function DeployScript(script, args, signer) {
+    return deploy(script, {
+      from: deployer,
+      gasPrice,
+      nonce: deployerNonce,
+      args,
+    }).then(async (instance) => {
+      deployerNonce += 1;
+      console.log(`Deployed ${script} contract @ ${instance.address}`);
+      const contract = new ethers.Contract(instance.address, instance.abi);
+      return contract.connect(signer)
+    })
+  }
 
+  // console.log(`Deployed TheFondueMicePot contract @ ${TheFondueMicePot.address}`);
+  // await TheFondueMicePot.setRewardsToken(DAI_ADDRESS);
+  console.log(`Set rewards token to DAI`);
+
+  // await FondueTicketsV2.SetMousePot(TheFondueMicePot.address);
+
+  // check balance of address of 0xB72...
+  // const balance = await FondueTicketsV2.balanceOf("0xB72C0Bd8e68De7de2Bf99abe238Ad7d18F9daaF7", 0);
+  
+  // console.log(`balance of 0xB72C0Bd8e68De7de2Bf99abe238Ad7d18F9daaF7 is ${balance}`);
+  // const totalSupply = await FondueTicketsV2.totalSupply(0);
+
+  // console.log(`total supply is ${totalSupply}`);
 }
 
-module.exports.tags = ["TheFondueMicePot", "FondueTicketsV2"];
+module.exports.tags = ["TheFondueMicePot", "DummyTickets"];
 
 function DeployFondueTickets() {
   return async ({

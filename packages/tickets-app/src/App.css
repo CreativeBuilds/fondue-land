@@ -295,11 +295,30 @@ button {
 .mice-input::placeholder {
   color: #939393;
 }
+.input-message {
+  color: #0c0b0b;
+}
+.prices {
+  position: relative;
+  display: flex;
+  margin: 0ch 1ch;
+  box-sizing: border-box;
+  margin: auto;
+  width: calc(100% - 2.25ch);
+}
+.prices span {
+  font-size: 0.75ch;
+  color: #0c0b0b;
+  font-weight: bolder;
+}
+.prices span:nth-child(2) {
+  margin-left: auto;
+}
 .mice-balance {
   position: absolute;
   bottom: 0.1ch;
   z-index: 4;
-  right: 1ch;
+  right: 0.25ch;
   font-size: 0.8em;
 }
 .arrow-box {
@@ -382,6 +401,91 @@ button {
   padding-bottom: 5ch;
   padding-top: 1ch;
   grid-gap: 3ch;
+  max-width: 1200px;
+}
+
+/* media query for above 1k px */
+@media screen and (max-width: 1000px) {
+
+  .App-dashboard {
+    grid-template-columns: 4fr 3fr 3fr;
+    grid-template-rows: 30% 20% 10% 20% 10% 20%;
+  }
+
+  .App-dashboard-earnings {
+    grid-row: 1/3 !important;
+    grid-column: 1/2 !important;
+  }
+
+  .App-dashboard-jackpot {
+    grid-row: 1/1 !important;
+    grid-column: 2/5 !important;
+  }
+
+  .App-dashboard-activity {
+    grid-row: 3/6 !important;
+    grid-column: 1/2 !important;
+  }
+
+  .App-dashboard-buy-keys {
+    grid-row: 2/4 !important;
+    grid-column: 2/5 !important;
+    flex: 1;
+  }
+  
+  .App-dashboard-enter-jackpot {
+    grid-row: 4/6 !important;
+    grid-column: 2/5 !important;
+  }
+
+  #title {
+    display: none;
+  }
+
+  .App-header-bar-account {
+    font-size: 0.8em;
+  }
+  .App-header-bar .PixelButton-background {
+    font-size: 0.8em;
+  }
+}
+
+@media screen and (max-width: 680px) {
+
+  .App-dashboard {
+    grid-template-columns: 100% !important;
+    grid-template-rows: unset !important;
+  }
+
+  .App-dashboard-earnings {
+    grid-row: 5 !important;
+    grid-column: 1 !important;
+  }
+
+  .App-dashboard-jackpot {
+    grid-row: 1 !important;
+    grid-column: 1 !important;
+    min-height:11ch;
+  }
+
+  .App-dashboard-activity {
+    grid-row: 6 !important;
+    grid-column: 1 !important;
+  }
+
+  .App-dashboard-buy-keys {
+    grid-row: 2/4 !important;
+    grid-column: 1 !important;
+    flex: 1;
+    min-height:12ch;
+  }
+  
+  .App-dashboard-enter-jackpot {
+    grid-row: 4 !important;
+    grid-column: 1 !important;
+  }
+
+  
 }
 
 .App-dashboard .PixelBox {
@@ -416,6 +520,7 @@ button {
   position: relative;
   z-index: 1;
   font-size: 0.5ch;
+  line-height: 1.25ch;
 }
 .App-dashboard .PixelBox-content .max-mice {
   right: 1ch;
@@ -430,6 +535,7 @@ button {
 .App-dashboard-earnings .PixelBox-content {
   display: flex;
   flex-direction: column;
+  overflow: inherit;
 }
 .App-dashboard-earnings .PixelBox-content .PixelButton {
   width: inherit;
@@ -508,8 +614,8 @@ ul li .amount span {
   bottom: 0.5ch;
 }
 ul li .amount span:nth-child(1) {
-  bottom: max(40%, 1.5ch);
-  right: 3ch;
+  bottom:0.75ch;
+  right: 0.75ch;
 }
 ul li .amount span:nth-child(2) {
   bottom: max(40%, 1.5ch);
@@ -520,10 +626,26 @@ ul li .amount span:nth-child(2) {
 ul li .amount span:nth-child(3) {
   font-size: 0.5ch;
 }
+
+li.takeThePot {
+  /* background orangered */
+  background-color: #ffa500 !important;
+  border: 0.25ch dashed #ffe251 !important;
+
+}
 .buyer {
   font-size: 0.6ch;
   text-align: left;
   line-height: 1.5ch;
+}
+.buyer.takeThePot {
+  width: max-content;
+  max-width: fit-content;
+}
+.buyer.takeThePot .highlight {
+  /* bright redorange color */
+  color: #ffe251;
+  /* text-shadow: 2px 2px 0px #ffa500; */
 }
 .buyer span {
   font-size: inherit;
@@ -538,4 +660,23 @@ ul li .amount span:nth-child(3) {
 .timeago {
   font-size: 0.5ch;
   text-align: left;
+}
+
+.absolute .PixelBox-content {
+  position: absolute;
+  top: 0.75ch;
+  left: 0.75ch;
+  padding: 0.75ch;
+  padding-top: 0.25ch;
+  width: calc(100% - 1.5ch);
+  height: calc(100% - 0.5ch) !important;
+  overflow: auto;
+  overflow-x: hidden;
+}
+
+.PixelBox.App-dashboard-buy-keys .PixelBox-content {
+  /* display: flex;
+  flex-direction: column;
+  justify-self: center;
+  align-items: center; */
 }

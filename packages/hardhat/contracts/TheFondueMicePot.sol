@@ -1,65 +1,78 @@
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
+import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Receiver.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-// Todo implement ERC20 rewards
-import "./ERC20Rewards.sol";
+import "./token/ERC20Rewards.sol";
 
-contract TheFondueMicePot is ERC20Rewards, IERC1155Receiver {
+contract TheFondueMicePot is ERC20Rewards, ERC1155Receiver {
     
-    IERC1155 FondueKeys = IERC1155(0x65324732592b50fe72c86cE4041F2AeFcd55DA84);
-    address first_place;
-    address second_place;
-    uint256 total_keys_entered = 0;
-    uint256 blocks_per_key = 150;
-    uint256 max_block_timer = blocks_per_key * 200; // max 200 keys worth deposited
-    uint256 timer_end_date = 0;
+    IERC1155 FondueKeys;
+    address public first_place;
+    address public second_place;
+    uint256 public total_keys_entered = 0;
+    uint256 public blocks_per_key = 150;
+    uint256 public max_block_timer = blocks_per_key * 500; // max 500 keys worth deposited
+    uint256 public timer_end_date = 0;
 
-    event KeysDeposited (address from, uint256 _amount, uint256 _endDate);
+    event TakeThePot (address from, uint256 _amount, uint256 _endDate);
     
-    constructor(address rewardsToken_, IERC1155 _fondueKeys) ERC20Rewards(
+    /* call setRewardsToken after deploying */
+    constructor( IERC1155 _fondueKeys) ERC20Rewards(
         "fondue",
         "fondue",
         9
     ) {
         FondueKeys = _fondueKeys;
-        setRewardsToken(rewardsToken_);
     }
 
     function enterKeys(uint256 _amount) external returns (uint256 keys_deposited){
-        uint256 maxKeysToSend =  maxDepositable(_amount);
-        uint256 _amountToSend = (maxKeysToSend > _amount) ? _amount : maxKeysToSend;
+        require(msg.sender != first_place, "you're in possesion of the pot already");
+        uint256 max = maxDepositable() * 10 ** 9;
+        uint256 maxKeysSendable =  max > _amount ? _amount : max;
+        uint256 _amountToSend = (maxKeysSendable > _amount) ? _amount : maxKeysSendable;
             
-        FondueKeys.safeTransferFrom(msg.sender, address(this), 0, _amountToSend * 10 ** 9, "");
+        FondueKeys.safeTransferFrom(msg.sender, address(this), 0, _amountToSend, "");
+        _burn(address(this), _amountToSend);
+
+        second_place = first_place;
+        first_place = msg.sender;
+
+        if(timer_end_date == 0) timer_end_date = block.number + (_amountToSend / 10 ** 9 * blocks_per_key);
+        else timer_end_date = timer_end_date + ((_amountToSend / 10 ** 9) * blocks_per_key);
+
+        emit TakeThePot(msg.sender, _amountToSend / 10 ** 9, timer_end_date);
         
-        return (_amount > maxKeysToSend) ? _amount : maxKeysToSend;
+        keys_deposited = _amountToSend;
+        return keys_deposited;
     }
 
-    function maxDepositable() view returns(uint256 maxKeysToSend) {
+    function maxDepositable() view public returns(uint256 maxKeysToSend) {
+        if(timer_end_date == 0) {
+            maxKeysToSend = 100;
+            return maxKeysToSend;
+        }
         uint256 blocksTillEnd = block.number < timer_end_date ? timer_end_date - block.number : 0;
         maxKeysToSend = (max_block_timer - blocksTillEnd) / blocks_per_key;
     }
 
-    function onERC1155Received(address operator, address from, uint256 id, uint256 value, bytes data) {
-        require(_msgSender() == address(FondueKeys), "unauthorized");
+    function onERC1155Received(address operator, address from, uint256 id, uint256 value, bytes calldata data) override external returns(bytes4) {
+        require(msg.sender == address(FondueKeys), "unauthorized");
         require(id == 0, "incorrect nft");
-        require(value > 0, "invalid value");
+        require(value / 10 ** 9 > 0, "invalid value");
         require(value <= maxDepositable() * 10 ** 9, "exceeds maximum depositable keys");
         require(timer_end_date == 0 || block.number < timer_end_date, "round has ended");
 
         _mint(from, value);
-
-
-        if(timer_end_date == 0) timer_end_date = block.number + (value / 10 ** 9 * blocks_per_key);
-        else timer_end_date = timer_end_date + ((value / 10 ** 9) * blocks_per_key);
-
-        emit KeysDeposited(from, value / 10 ** 9, timer_end_date);
+        
+        return bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"));
     }
+
+    function onERC1155BatchReceived(address operator, address from, uint256[] memory ids, uint256[] memory values, bytes calldata data) override external returns(bytes4) {}
 
     /**
      * @dev used if ever harmony block times significantly change 
      */
-    function setBlocks(uint256 _blocks_per_key, uint256 _total_keys) auth {
+    function setBlocks(uint256 _blocks_per_key, uint256 _total_keys) auth public {
         blocks_per_key = _blocks_per_key;
         max_block_timer = blocks_per_key * _total_keys;
     }

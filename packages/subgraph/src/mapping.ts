@@ -1,28 +1,28 @@
 import { BigInt } from "@graphprotocol/graph-ts";
 // import {Deposit, Winner} from "../generated/FonduePot/FonduePot";
 import {TicketPurchase} from "../generated/FondueTickets/FondueTickets";
-import {KeysDeposited} from "../generated/TheFondueMicePot/TheFondueMicePot"; 
-import {Purchase, Deposit} from "../generated/schema";
+import {TakeThePot} from "../generated/TheFondueMicePot/TheFondueMicePot"; 
+import {Purchase, TakeThePot as Deposit} from "../generated/schema";
 
 export function handleTicketPurchase(event: TicketPurchase): void {
   let amount = event.params.value;
   let player = event.transaction.from;
-  let isPresale = event.params.isPresale;
   let purchase = new Purchase(event.transaction.hash.toHex() +"-"+ event.transaction.index.toString());
   purchase.createdAt = event.block.timestamp;
   purchase.amount = amount;
-  purchase.isPresale = isPresale;
+  purchase.cost = event.params.cost;
   purchase.purchaser = player;
+  purchase.isPresale = false;
   purchase.save();
 }
 
-export function handleKeysDeposited(event: KeysDeposited): void {
-  let amount = event.params.value;
+export function handleKeysDeposited(event: TakeThePot): void {
+  let amount = event.params._amount;
   let player = event.transaction.from;
-  let deposit = new Deposit(event.transaction.hash.toString()+"-"+player.toHex());
+  let deposit = new Deposit(event.transaction.hash.toHex()+"-"+ event.transaction.index.toString());
   deposit.createdAt = event.block.timestamp;
   deposit.amount = amount;
-  deposit.depositor = player;
+  deposit.depositer = player;
   deposit.save();
 }
 
