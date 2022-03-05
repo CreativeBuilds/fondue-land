@@ -380,16 +380,16 @@ function Dashboard({
           {/* <p style={{ marginTop: "auto", display: "flex-block" }}>
             Round time totals 45 days, 20 hours, and 30 minutes.
           </p> */}
-          <PixelButton onClick={() => null} disabled>
+          {/* <PixelButton onClick={() => null} disabled>
             CLAIM
-          </PixelButton>
+          </PixelButton> */}
         </PixelBox>
         {BuyKeys({ mice, daiBalance, approvedFor, daiContract: daiContract, price, contract: contract, Update: UpdateAll })}
         {Jackpot({ endDate, blocks, IS_FIRST_PLACE, places, endDateFormated })}
         <PixelBox className="App-dashboard-enter-jackpot">
           <h3>ENTER THE GAME</h3>
           <p>
-            If you're the last individual to "Take The Pot" you will win all the
+            If you're the last individual to <span style={{fontSize: 'inherit', color: "#ffe251", textShadow: "2px 2px 0px #0c0b0b"}}>"Take The Pot"</span> you will win all the
             mice in the jackpot!
           </p>
           {TakeThePotInput({ signer, keyBalance, maxDepositable, fondueContract, ticketContract: contract, keysApprovedForFondue, Update: UpdateAll })}
@@ -405,7 +405,7 @@ function Dashboard({
               id: string;
               createdAt: Date;
               type: "takeThePot" | "purchase"
-            }) => (<li className={i.type} key={i.id}>
+            }) => (<><li className={i.type} key={i.id}>
               <div className={`buyer ${i.type}`}>
                 <span className="highlight">{i.address.slice(0, 5)}<span>...</span>{i.address.slice(-3)}</span>{" "}
                 {i.type === "takeThePot" ? <>took the pot using <span className="highlight">{numToShorthand(i.amount)} key{i.amount !== 1 ? "s" : ""}!</span></> : `bought ${numToShorthand(i.amount)} keys!`}
@@ -415,7 +415,7 @@ function Dashboard({
                 moment(i.createdAt).fromNow()
               }</div>
               {i.type === "purchase" ? <div className="amount"><span>@ ${((i.cost || (1 * i.amount)) / i.amount).toFixed(2)}/ea</span></div> : null}
-            </li>))}
+            </li></>))}
           </ul>
         </PixelBox>
       </div>
@@ -437,7 +437,8 @@ function EntryEarnings(mice: number, fondueBalance: number) {
     value={fondueBalance / 10 ** 9}
     disabled={true} />
   <span style={{ position: 'absolute', right: '1ch', top: '1.5ch', zIndex: 1, fontSize: "0.75ch", color: "#0C0b0b" }}>FONDUE</span>
-</span><span
+</span>
+{/* <span
     style={{ width: "100%", marginTop: "1ch" }}
     className="input-wrapper"
   >
@@ -452,7 +453,8 @@ function EntryEarnings(mice: number, fondueBalance: number) {
       value={mice * 50}
       disabled={true} />
     <span style={{ position: 'absolute', right: '1ch', top: '1.5ch', zIndex: 1, fontSize: "0.75ch", color: "#0C0b0b" }}>DAI</span>
-  </span></>;
+  </span> */}
+  </>;
 }
 
 function Jackpot({ endDate, blocks, IS_FIRST_PLACE, places, endDateFormated }: { endDate: number; blocks: number; IS_FIRST_PLACE: boolean; places: string[]; endDateFormated: string; }) {
@@ -485,7 +487,11 @@ function BuyKeys({ mice, daiContract, daiBalance, price, approvedFor, contract, 
 
   return <PixelBox className="App-dashboard-buy-keys absolute">
     <h3>BUY KEYS</h3>
-    <p style={{lineHeight: '1.5ch'}}>Price of keys increases by $0.00033/key minted.<br/>The next key will cost <span style={{fontSize: 'inherit', color: "#ffe251", textShadow: "2px 2px 0px #0c0b0b"}}>${price.toFixed(2)}</span></p>
+    <p style={{lineHeight: '1.5ch'}}>Price of keys increases by <span style={{fontSize: 'inherit', color: "#ffe251", textShadow: "2px 2px 0px #0c0b0b"}}>$0.00033/key</span> minted.<br/>The next key will cost <span style={{fontSize: 'inherit', color: "#ffe251", textShadow: "2px 2px 0px #0c0b0b"}}>${price.toFixed(2)}</span></p>
+    <div className="balances">
+      <span>BAL</span>  
+      <span>${daiBalance.toFixed(2)}</span>
+    </div>
     <span
       style={{ width: "calc(100% - 2.25ch)" }}
       className="input-wrapper"
@@ -503,12 +509,19 @@ function BuyKeys({ mice, daiContract, daiBalance, price, approvedFor, contract, 
         onChange={UpdateKeys} />
     </span>
     <div className="prices" style={{ position: 'relative' }}>
-      {price === 0 ? <span>LOADING...</span> : <><span>TOTAL</span>
-      <span>${TotalCost}</span></>}
+      {price === 0 ? <span>LOADING...</span> : <><span style={{color: "#ffe251", textShadow: "2px 2px 0px #0c0b0b"}}>TOTAL</span>
+      <span style={{color: "#ffe251", textShadow: "2px 2px 0px #0c0b0b"}}>${TotalCost}</span></>}
     </div>
-    <PixelButton disabled={keys === 0 || price === 0} onClick={() => contract?.PurchaseWithDAI(keys).then(Update())}>
+    <div style={{width: "100%",  height: '4ch', display: "flex", alignItems: 'center'}}>
+      {approvedFor > Number(TotalCost) 
+        ? (<PixelButton disabled={keys === 0 || price === 0} onClick={() => contract?.PurchaseWithDAI(keys).then(Update())}>
       BUY
-    </PixelButton>
+    </PixelButton>) 
+        : (<PixelButton onClick={() => daiContract?.approve(contract?.address, ethers.constants.MaxUint256).then(Update())}>
+          APPROVE
+          </PixelButton>)}
+    
+    </div>
   </PixelBox>;
 
   function UpdateKeys(e: React.ChangeEvent<HTMLInputElement>) {

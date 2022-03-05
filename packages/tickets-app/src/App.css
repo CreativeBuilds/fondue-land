@@ -305,6 +305,7 @@ button {
   box-sizing: border-box;
   margin: auto;
   width: calc(100% - 2.25ch);
+  margin-top: 0.75ch;
 }
 .prices span {
   font-size: 0.75ch;
@@ -404,8 +405,25 @@ button {
   max-width: 1200px;
 }
 
+
+
 /* media query for above 1k px */
 @media screen and (max-width: 1000px) {
+
+  .purchase .timeago {
+    font-size: 0.4ch ;
+    font-weight: bolder;
+  }
+  .purchase .amount span {
+    font-size: 0.4ch ;
+    /* right: 1.5ch !important;*/
+    bottom: 1ch ; 
+    font-weight: bolder;
+  }
+
+  .purchase .buyer.purchase {
+    font-size: 0.55ch ;
+  }
 
   .App-dashboard {
     grid-template-columns: 4fr 3fr 3fr;
@@ -565,6 +583,7 @@ button {
 .App-dashboard-buy-keys {
   grid-column: 1/2;
   grid-row: 4/6;
+  min-height: 16ch;
 }
 
 .App-dashboard-jackpot .PixelBox-content {
@@ -580,12 +599,27 @@ button {
 .App-dashboard-jackpot .PixelBox-content h3 {
 margin-top: 1ch;
 }
+.App-dashboard-activity .PixelBox-content {
+  overflow:hidden;
+}
 .App-dashboard-activity ul {
   list-style-type: none;
   padding: 0;
   margin: 0;
   position: relative;
   z-index: 1;
+  overflow: hidden;
+  height: calc(100% - 1ch);
+}
+.App-dashboard-activity ul::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(0,0,0,0) 0%,rgba(0,0,0,0) 65%, rgb(91, 182, 107) 90%);
 }
 .App-dashboard-activity ul {
   max-height: 100%;
@@ -675,8 +709,28 @@ li.takeThePot {
 }
 
 .PixelBox.App-dashboard-buy-keys .PixelBox-content {
-  /* display: flex;
+  display: flex;
   flex-direction: column;
-  justify-self: center;
-  align-items: center; */
+  /* justify-self: center; */
+  align-items: center;
+}
+
+.balances {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: calc(100% - 2ch);
+  margin-top: 1ch;
+}
+
+.balances span {
+  font-size: 0.66ch;
+  color: #0c0b0b;
+  font-weight: bold;
+}
+
+.PixelBox.App-dashboard-buy-keys .PixelBox-content .PixelButton {
+  width: calc(100% - 2ch);
+  height: 2ch;
+  margin: auto
 }

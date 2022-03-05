@@ -138,13 +138,14 @@ export function useFondueTicketsV2(signer: Signer) {
 
   function UpdateDaiInfo() {
     return async () => {
-      Promise.all([
-        signer?.getAddress()?.then(address => daiContract?.allowance(address, ticketContract?.address)),
-        signer?.getAddress()?.then(address => daiContract?.balanceOf(address, 0)),
+      signer?.getAddress().then(address => Promise.all([
+        daiContract?.allowance(address, ticketContract?.address),
+        daiContract?.balanceOf(address),
       ]).then(([a, b]) => {
-        setApprovedFor(Number(((a as BigNumber).toNumber() / 10 ** 18).toFixed(2)));
-        setDaiBalance(Number(((b as BigNumber).toNumber() / 10 ** 18).toFixed(2)));
-      });
+        console.log(Number(b.toString()));
+        setApprovedFor(Number((Number(a.toString()) / 10 ** 18).toFixed(2)));
+        setDaiBalance(Number((Number(b.toString()) / 10 ** 18).toFixed(2)));
+      }));
     };
   }
 
