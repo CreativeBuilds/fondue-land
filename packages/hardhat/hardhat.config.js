@@ -274,8 +274,7 @@ module.exports = {
       },
     },
     mainnetHarmony: {
-      url: "https://harmony-0-rpc.gateway.pokt.network",
-      gasPrice: 20 * 1000000000,
+      url: "https://api.harmony.one",
       chainId: 1666600000,
       accounts: {
         mnemonic: mnemonic(),

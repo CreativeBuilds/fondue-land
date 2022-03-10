@@ -3,12 +3,12 @@ schema:
   file: ./src/schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: FondueTickets
+    name: FondueTicketsV2
     network: mainnet
     source:
-      address: "{{mainnetHarmony_FondueTicketsAddress}}"
-      abi: FondueTickets
-      startBlock: 23060000
+      address: "{{mainnetHarmony_FondueTicketsV2Address}}"
+      abi: FondueTicketsV2
+      startBlock: 23715599
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -16,9 +16,29 @@ dataSources:
       entities:
         - Purchase
       abis:
-        - name: FondueTickets
-          file: ./abis/mainnetHarmony_FondueTickets.json
+        - name: FondueTicketsV2
+          file: ./abis/mainnetHarmony_FondueTicketsV2.json
       eventHandlers:
-        - event: TicketPurchase(address,uint256,uint256,bool)
+        - event: TicketPurchase(indexed address,uint256,uint256)
           handler: handleTicketPurchase
+      file: ./src/mapping.ts
+  - kind: ethereum/contract
+    name: TheFondueMicePot
+    network: mainnet
+    source:
+      address: "{{mainnetHarmony_TheFondueMicePotAddress}}"
+      abi: TheFondueMicePot
+      startBlock: 23715599
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - TakeThePot
+      abis:
+        - name: TheFondueMicePot
+          file: ./abis/mainnetHarmony_TheFondueMicePot.json
+      eventHandlers:
+        - event: TakeThePot(address,uint256,uint256)
+          handler: handleKeysDeposited
       file: ./src/mapping.ts

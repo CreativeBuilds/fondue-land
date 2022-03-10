@@ -5,10 +5,12 @@
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ GITHUB_USERNAME/your-contract",
-    "create-local": "graph create --node http://localhost:8020/ scaffold-eth/your-contract",
-    "remove-local": "graph remove --node http://localhost:8020/ scaffold-eth/your-contract",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 scaffold-eth/your-contract"
+    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ fondueland/tickets",
+    "create-harmony": "graph create --node https://graph.t.hmny.io:8020 fondueland",
+    "deploy-harmony": "graph deploy --node https://graph.t.hmny.io:8020 --ipfs http://graph.t.hmny.io:5001 fondueland",
+    "create-local": "graph create --node http://localhost:8020/ fondueland/tickets",
+    "remove-local": "graph remove --node http://localhost:8020/ fondueland/tickets",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 fondueland/tickets"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "^0.20.1",
